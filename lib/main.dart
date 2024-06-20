@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'widgets/bottom_navigation.dart';
+import 'widgets/background_gradient.dart';
+import 'pages/home_page.dart';
+import 'pages/calendar_page.dart';
+import 'pages/communites.dart';
+import 'pages/profile_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -13,24 +18,24 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomePage(),
+      home: MainScreen(),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
+class MainScreen extends StatefulWidget {
   @override
-  _HomePageState createState() => _HomePageState();
+  _MainScreenState createState() => _MainScreenState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _widgetOptions = <Widget>[
-    Text('Home Page'),
-    Text('Calendar Page'),
-    Text('Group Page'),
-    Text('Profile Page'),
+  final List<Widget> _widgetOptions = [
+    HomePage(),
+    CalendarPage(),
+    CommunityPage(), // Corrected from GroupPage to CommunityPage
+    ProfilePage(),
   ];
 
   void _onItemTapped(int index) {
@@ -42,7 +47,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
+      body: BackgroundGradient(
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigation(

@@ -41,7 +41,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
       selectedItemColor: Colors.black,
       unselectedItemColor: Colors.grey,
       onTap: widget.onItemTapped,
-      backgroundColor: Color(0xFFF9EAEA), // Set the background color
+      backgroundColor: Color.fromARGB(255, 252, 208, 208), // Set the background color
     );
   }
 }
