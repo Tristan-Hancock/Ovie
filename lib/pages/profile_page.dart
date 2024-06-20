@@ -5,7 +5,7 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Text(
-        'Profile Page',
+        'Page under construction',
         style: TextStyle(fontSize: 24),
       ),
     );

@@ -5,7 +5,7 @@ class CalendarPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Text(
-        'Calendar Page',
+        'Page under construction',
         style: TextStyle(fontSize: 24),
       ),
     );

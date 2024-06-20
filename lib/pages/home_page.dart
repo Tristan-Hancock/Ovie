@@ -5,7 +5,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Text(
-        'Home Page',
+        'Page under construction',
         style: TextStyle(fontSize: 24),
       ),
     );
