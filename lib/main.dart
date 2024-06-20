@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'widgets/background_gradient.dart';
 
 void main() {
   runApp(MyApp());
@@ -21,11 +22,13 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Ovie Home'),
-      ),
-      body: Center(
-        child: Text('Welcome to Ovie App!'),
+      body: BackgroundGradient(
+        child: Center(
+          child: Text(
+            'Welcome to Ovie App!',
+            style: TextStyle(fontSize: 24, color: Colors.white),
+          ),
+        ),
       ),
     );
   }
