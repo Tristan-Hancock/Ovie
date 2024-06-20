@@ -36,7 +36,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
           ),
           BottomNavigationBarItem(
             icon: FaIcon(FontAwesomeIcons.calendar),
-            label: 'Tracker',
+            label: 'Calendar',
           ),
           BottomNavigationBarItem(
             icon: FaIcon(FontAwesomeIcons.users),
