@@ -5,14 +5,19 @@ import 'pages/home_page.dart';
 import 'pages/calendar_page.dart';
 import 'pages/communites.dart';
 import 'pages/profile_page.dart';
-import 'services/auth_service.dart';
-
+import 'pages/important_intro/intro_check.dart';
+import 'pages/important_intro/intro_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp());
+  bool showIntro = await IntroCheck.isFirstTime(); // Check if it's the first time
+  runApp(MyApp(showIntro: showIntro));
 }
 
 class MyApp extends StatelessWidget {
+  final bool showIntro;
+
+  MyApp({required this.showIntro});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -20,7 +25,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MainScreen(),
+      initialRoute: showIntro ? '/intro' : '/home',
+      routes: {
+        '/intro': (context) => IntroScreen(),
+        '/home': (context) => MainScreen(),
+        '/calendar': (context) => CalendarPage(),
+        '/community': (context) => CommunityPage(),
+        '/profile': (context) => ProfilePage(),
+      },
     );
   }
 }
@@ -31,7 +43,6 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  // final AuthService _authService = AuthService();
   int _selectedIndex = 0;
 
   final List<Widget> _widgetOptions = [
@@ -40,12 +51,6 @@ class _MainScreenState extends State<MainScreen> {
     CommunityPage(),
     ProfilePage(),
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    // _authService.signInAnonymously();
-  }
 
   void _onItemTapped(int index) {
     setState(() {
