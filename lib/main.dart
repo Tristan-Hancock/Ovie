@@ -1,4 +1,3 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'widgets/bottom_navigation.dart';
 import 'widgets/background_gradient.dart';
@@ -10,7 +9,6 @@ import 'services/auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -33,7 +31,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  final AuthService _authService = AuthService();
+  // final AuthService _authService = AuthService();
   int _selectedIndex = 0;
 
   final List<Widget> _widgetOptions = [
@@ -46,7 +44,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    _authService.signInAnonymously();
+    // _authService.signInAnonymously();
   }
 
   void _onItemTapped(int index) {

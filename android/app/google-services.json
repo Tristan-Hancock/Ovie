@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "366437988737",
+    "project_id": "ovie-andriod",
+    "storage_bucket": "ovie-andriod.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:366437988737:android:4e76734064df081cb9d080",
+        "android_client_info": {
+          "package_name": "com.example.ovie"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBV_idmzqr_mUIOX_bvsn3TNJVMYytVRYw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
