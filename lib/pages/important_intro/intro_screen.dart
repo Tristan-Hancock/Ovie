@@ -7,57 +7,57 @@ class IntroScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: BackgroundGradient(
-        child: IntroductionScreen(
-          pages: [
-            PageViewModel(
-              title: "ovie.",
-              body: "",
-              image: Container(
-                height: 300,
-                child: Image.asset(
-                  'assets/women.png',
-                  fit: BoxFit.contain,
-                ),
-              ),
-              footer: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacementNamed(context, '/home');
-                },
-                child: Text('Get started'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFDCAAC5),
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                  textStyle: TextStyle(fontSize: 18),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(height: 40),
+                Text(
+                  "ovie.",
+                  style: TextStyle(
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
                 ),
-              ),
-              decoration: const PageDecoration(
-                titleTextStyle: TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                Expanded(
+                  child: Center(
+                    child: Container(
+                      width: 300,
+                      height: 300,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withOpacity(0.3),
+                      ),
+                      child:Stack(
+  alignment: Alignment.center,
+  children: [
+    Image.asset('assets/images/fatyellowoman.png'),
+    Image.asset('assets/images/file.png'),
+    Image.asset('assets/images/suitwoman.png'),
+  ],
+),
+                    ),
+                  ),
                 ),
-                bodyTextStyle: TextStyle(fontSize: 18),
-                imagePadding: EdgeInsets.all(24),
-                pageColor: Colors.transparent,
-              ),
-            ),
-          ],
-          onDone: () {
-            Navigator.pushReplacementNamed(context, '/home');
-          },
-          showSkipButton: false,
-          showNextButton: false,
-          done: const Text("Done", style: TextStyle(fontWeight: FontWeight.w600)),
-          dotsDecorator: DotsDecorator(
-            size: const Size(10.0, 10.0),
-            color: Colors.black26,
-            activeSize: const Size(22.0, 10.0),
-            activeColor: Theme.of(context).colorScheme.secondary,
-            activeShape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(25.0),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushReplacementNamed(context, '/home');
+                  },
+                  child: Text('Get started'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFDCAAC5),
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                    textStyle: TextStyle(fontSize: 18),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 40),
+              ],
             ),
           ),
         ),
