@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:introduction_screen/introduction_screen.dart';
 import 'package:ovie/widgets/background_gradient.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class IntroScreen extends StatelessWidget {
   @override
@@ -11,15 +11,15 @@ class IntroScreen extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SizedBox(height: 40),
-                Text(
-                  "ovie.",
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                Center(
+                  child: Text(
+                    "ovie.",
+                    style: GoogleFonts.bonaNova(
+                      fontSize: 65,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
                 Expanded(
@@ -31,32 +31,44 @@ class IntroScreen extends StatelessWidget {
                         shape: BoxShape.circle,
                         color: Colors.white.withOpacity(0.3),
                       ),
-                      child:Stack(
-  alignment: Alignment.center,
-  children: [
-    Image.asset('assets/images/fatyellowoman.png'),
-    Image.asset('assets/images/file.png'),
-    Image.asset('assets/images/suitwoman.png'),
-  ],
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset('assets/images/fatyellowoman.png', width: 90),
+                          Image.asset('assets/images/file.png', width: 90),
+                          Image.asset('assets/images/suitwoman.png', width: 90),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+  child: ElevatedButton(
+    onPressed: () {
+      Navigator.pushReplacementNamed(context, '/home');
+    },
+    child: Text(
+      'Get started',
+      style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+        color: Colors.white,
+      ),
+    ),
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Color.fromARGB(255, 246, 138, 206), // Adjusted to match the image change to FECCEA later
+      foregroundColor: Colors.white,
+      padding: EdgeInsets.symmetric(vertical: 12),
+      minimumSize: Size(double.infinity, 78), // Set a fixed height
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8), // Less rounded corners
+      ),
+      elevation: 0, // Remove shadow
+    ),
+  ),
 ),
-                    ),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushReplacementNamed(context, '/home');
-                  },
-                  child: Text('Get started'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFDCAAC5),
-                    padding: EdgeInsets.symmetric(vertical: 15),
-                    textStyle: TextStyle(fontSize: 18),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 40),
+SizedBox(height: 40),
               ],
             ),
           ),
