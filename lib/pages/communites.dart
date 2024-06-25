@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ovie/widgets/background_gradient.dart';
-
+import 'package:ovie/pages/chat/chat_screen.dart';
 class CommunityPage extends StatefulWidget {
   @override
   _CommunityPageState createState() => _CommunityPageState();
@@ -81,7 +81,12 @@ class _CommunityPageState extends State<CommunityPage> with SingleTickerProvider
                         SizedBox(width: 20),
                         IconButton(
                           icon: Icon(Icons.send, color: Colors.black),
-                          onPressed: () => print('send message tapped'),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => ChatScreen()),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -92,7 +97,7 @@ class _CommunityPageState extends State<CommunityPage> with SingleTickerProvider
               floatingActionButton: FloatingActionButton(
                 onPressed: () => print('tapped +'),
                 child: Icon(Icons.add),
-                backgroundColor: Colors.pink,
+                backgroundColor: const Color.fromARGB(255, 248, 207, 221),
               ),
               floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
             ),
