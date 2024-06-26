@@ -29,14 +29,16 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: FirebaseAuth.instance.currentUser == null ? '/auth' : (showIntro ? '/intro' : '/home'),
-     routes: {
-  '/intro': (context) => IntroScreen(),
-  '/home': (context) => MainScreen(),
-  '/calendar': (context) => CalendarPage(),
-  '/community': (context) => CommunityPage(),
-  '/profile': (context) => ProfilePage(),
-},
+ initialRoute: '/',
+      routes: {
+        '/': (context) => AuthPage(), // Ensure the root route is defined
+  //need to fix this routing to stop showing the intro
+        '/intro': (context) => IntroScreen(),
+        '/home': (context) => MainScreen(),
+        '/calendar': (context) => CalendarPage(),
+        '/community': (context) => CommunityPage(),
+        '/profile': (context) => ProfilePage(),
+      },
     );
   }
 }

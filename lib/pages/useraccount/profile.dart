@@ -32,45 +32,99 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  void _showSignOutDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Sign Out'),
+          content: Text('Are you sure you would like to sign out?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Sign Out'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _authService.signOut();
+                Navigator.pushReplacementNamed(context, '/');
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: BackgroundGradient(
-        child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              SizedBox(height: 40),
               Text(
-                'Profile',
+                '$_username',
                 style: TextStyle(
-                  fontSize: 30,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 10),
               Text(
-                'Username: $_username',
+                '0 followers',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   color: Colors.black,
                 ),
               ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  await _authService.signOut();
-                  Navigator.pushReplacementNamed(context, '/');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFDCAAC5),
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                  textStyle: TextStyle(fontSize: 18),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+              SizedBox(height: 10),
+              GestureDetector(
+                onTap: _showSignOutDialog,
+                child: Text(
+                  'SignOut',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.black,
+                    decoration: TextDecoration.underline,
                   ),
                 ),
-                child: Text('Sign Out'),
+              ),
+              SizedBox(height: 40),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'My Posts',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'My Upvotes',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
