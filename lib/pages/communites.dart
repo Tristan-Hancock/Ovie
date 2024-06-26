@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ovie/widgets/background_gradient.dart';
 import 'package:ovie/pages/chat/chat_screen.dart';
+
 class CommunityPage extends StatefulWidget {
   @override
   _CommunityPageState createState() => _CommunityPageState();
@@ -10,6 +11,7 @@ class _CommunityPageState extends State<CommunityPage> with SingleTickerProvider
   late AnimationController _animationController;
   bool _isDrawerOpen = false;
   String _selectedCommunity = 'My Communities';
+  bool _isPostsSelected = true; // Add this variable to track the selected tab
 
   @override
   void initState() {
@@ -28,6 +30,12 @@ class _CommunityPageState extends State<CommunityPage> with SingleTickerProvider
       } else {
         _animationController.reverse();
       }
+    });
+  }
+
+  void _selectTab(bool isPosts) {
+    setState(() {
+      _isPostsSelected = isPosts;
     });
   }
 
@@ -58,7 +66,7 @@ class _CommunityPageState extends State<CommunityPage> with SingleTickerProvider
               appBar: AppBar(
                 backgroundColor: Color.fromARGB(255, 252, 208, 208),
                 elevation: 0,
-                automaticallyImplyLeading: false,
+                                automaticallyImplyLeading: false,
                 title: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -70,13 +78,25 @@ class _CommunityPageState extends State<CommunityPage> with SingleTickerProvider
                     Row(
                       children: [
                         GestureDetector(
-                          onTap: () => print('unread tapped'),
-                          child: Text('Unread', style: TextStyle(color: Colors.black)),
+                          onTap: () => _selectTab(true), // Set the state to show posts
+                          child: Text(
+                            'Posts',
+                            style: TextStyle(
+                              color: _isPostsSelected ? Colors.black : Colors.grey, // Highlight selected tab
+                              fontWeight: _isPostsSelected ? FontWeight.bold : FontWeight.normal,
+                            ),
+                          ),
                         ),
                         SizedBox(width: 20),
                         GestureDetector(
-                          onTap: () => print('Saved tapped'),
-                          child: Text('Saved', style: TextStyle(color: Colors.black)),
+                          onTap: () => _selectTab(false), // Set the state to show saved
+                          child: Text(
+                            'Saved',
+                            style: TextStyle(
+                              color: !_isPostsSelected ? Colors.black : Colors.grey, // Highlight selected tab
+                              fontWeight: !_isPostsSelected ? FontWeight.bold : FontWeight.normal,
+                            ),
+                          ),
                         ),
                         SizedBox(width: 20),
                         IconButton(
@@ -93,7 +113,7 @@ class _CommunityPageState extends State<CommunityPage> with SingleTickerProvider
                   ],
                 ),
               ),
-              body: Center(child: Text('Main Content')),
+              body: _isPostsSelected ? _buildPostsContent() : _buildSavedContent(), // Change content based on selected tab
               floatingActionButton: FloatingActionButton(
                 onPressed: () => print('tapped +'),
                 child: Icon(Icons.add),
@@ -105,6 +125,14 @@ class _CommunityPageState extends State<CommunityPage> with SingleTickerProvider
         );
       },
     );
+  }
+
+  Widget _buildPostsContent() {
+    return Center(child: Text('Posts Content')); // Replace with actual posts content
+  }
+
+  Widget _buildSavedContent() {
+    return Center(child: Text('Saved Content')); // Replace with actual saved content
   }
 
   Widget _buildDrawer() {
@@ -121,37 +149,37 @@ class _CommunityPageState extends State<CommunityPage> with SingleTickerProvider
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-  padding: const EdgeInsets.all(16.0),
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.start,
-    children: [
-      DropdownButton<String>(
-        value: _selectedCommunity,
-        icon: Icon(Icons.arrow_drop_down, color: Colors.black),
-        iconSize: 24,
-        elevation: 16,
-        style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
-        dropdownColor: Color.fromARGB(255, 252, 208, 208),
-        underline: Container(
-          height: 2,
-          color: Colors.transparent,
-        ),
-        onChanged: (String? newValue) {
-          setState(() {
-            _selectedCommunity = newValue!;
-          });
-        },
-        items: <String>['My Communities', 'All Communities']
-            .map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
-      ),
-    ],
-  ),
-),
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          DropdownButton<String>(
+                            value: _selectedCommunity,
+                            icon: Icon(Icons.arrow_drop_down, color: Colors.black),
+                            iconSize: 24,
+                            elevation: 16,
+                            style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
+                            dropdownColor: Color.fromARGB(255, 252, 208, 208),
+                            underline: Container(
+                              height: 2,
+                              color: Colors.transparent,
+                            ),
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                _selectedCommunity = newValue!;
+                              });
+                            },
+                            items: <String>['My Communities', 'All Communities']
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
                     Expanded(
                       child: ListView(
                         padding: EdgeInsets.all(16.0),

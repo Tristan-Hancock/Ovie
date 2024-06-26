@@ -10,6 +10,7 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
+  final CollectionReference _messagesCollection = FirebaseFirestore.instance.collection('chats');
   final User? _currentUser = FirebaseAuth.instance.currentUser;
 
   void _sendMessage() {
@@ -23,7 +24,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  @override
+   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: BackgroundGradient(
@@ -44,22 +45,19 @@ class _ChatScreenState extends State<ChatScreen> {
             children: [
               Expanded(
                 child: StreamBuilder(
-                  stream: FirebaseFirestore.instance
-                      .collection('chats')
-                      .orderBy('timestamp', descending: true)
-                      .snapshots(),
-                  builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                  stream: _messagesCollection.orderBy('timestamp', descending: true).snapshots(),
+                  builder: (context, snapshot) {
                     if (!snapshot.hasData) {
                       return Center(child: CircularProgressIndicator());
                     }
+                    var messages = snapshot.data!.docs;
                     return ListView.builder(
                       reverse: true,
-                      itemCount: snapshot.data!.docs.length,
-                      itemBuilder: (ctx, index) {
-                        var message = snapshot.data!.docs[index];
+                      itemCount: messages.length,
+                      itemBuilder: (context, index) {
+                        var message = messages[index];
                         return ListTile(
                           title: Text(message['text']),
-                          subtitle: Text(message['senderId']),
                         );
                       },
                     );
@@ -74,16 +72,23 @@ class _ChatScreenState extends State<ChatScreen> {
                       child: TextField(
                         controller: _controller,
                         decoration: InputDecoration(
-                          hintText: 'Send a message...',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
+                          hintText: 'Type a message',
+                          border: OutlineInputBorder(),
                         ),
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.send, color: Colors.black),
-                      onPressed: _sendMessage,
+                      icon: Icon(Icons.send),
+                      onPressed: () {
+                        if (_controller.text.isNotEmpty) {
+                          _messagesCollection.add({
+                            'senderId': _currentUser?.uid,
+                            'text': _controller.text,
+                            'timestamp': FieldValue.serverTimestamp(),
+                          });
+                          _controller.clear();
+                        }
+                      },
                     ),
                   ],
                 ),
