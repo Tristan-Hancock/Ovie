@@ -80,7 +80,7 @@ Future<QuerySnapshot> _fetchPosts() {
             onPressed: () async {
               User? user = FirebaseAuth.instance.currentUser;
               if (user != null) {
-                await FirebaseFirestore.instance.collection('posts').add({
+                var postData = {
                   'content': _postController.text,
                   'timestamp': FieldValue.serverTimestamp(),
                   'upvotes': 0,
@@ -89,7 +89,9 @@ Future<QuerySnapshot> _fetchPosts() {
                   'saved': false,
                   'userId': user.uid,
                   'username': user.displayName ?? 'Anonymous',
-                });
+                };
+                print("Adding post data: $postData"); // Print statement
+                await FirebaseFirestore.instance.collection('posts').add(postData);
                 Navigator.of(context).pop();
                 _refreshPosts();
               }
@@ -101,6 +103,7 @@ Future<QuerySnapshot> _fetchPosts() {
     },
   );
 }
+
 
 
   @override
@@ -195,7 +198,7 @@ Future<QuerySnapshot> _fetchPosts() {
     );
   }
 
- Widget _buildPostsContent() {
+Widget _buildPostsContent() {
   return FutureBuilder<QuerySnapshot>(
     future: _postsFuture,
     builder: (context, snapshot) {
@@ -208,53 +211,108 @@ Future<QuerySnapshot> _fetchPosts() {
       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
         return Center(child: Text('No posts available.'));
       }
+
+      print("Fetched ${snapshot.data!.docs.length} posts"); // Print statement
+
       return ListView(
+        padding: EdgeInsets.zero,
         children: snapshot.data!.docs.map((doc) {
           Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+          print("Post data: $data"); // Print statement
+
           // Check if 'content' exists in the document data
           if (!data.containsKey('content')) {
+            print("Skipping post with missing content field: ${doc.id}"); // Print statement
             return Container(); // Skip this document if 'content' field is missing
           }
-          return Card(
-            margin: EdgeInsets.all(10),
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(data['username'] ?? 'Unknown', style: TextStyle(fontWeight: FontWeight.bold)),
-                  SizedBox(height: 5),
-                  Text(data['content']),
-                  SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          IconButton(icon: Icon(Icons.thumb_up), onPressed: () {}),
-                          SizedBox(width: 5),
-                          Text(data['upvotes'].toString()), // Upvotes count
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          IconButton(icon: Icon(Icons.comment), onPressed: () {}),
-                          SizedBox(width: 5),
-                          Text(data['comments'] != '' ? '1' : '0'), // Comments count
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          IconButton(icon: Icon(Icons.save), onPressed: () {}),
-                          SizedBox(width: 5),
-                          Text(data['saved'] ? '1' : '0'), // Saves count
-                        ],
-                      ),
-                    ],
+
+          return FutureBuilder<DocumentSnapshot>(
+            future: FirebaseFirestore.instance.collection('users').doc(data['userId']).get(),
+            builder: (context, userSnapshot) {
+              if (userSnapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+              if (userSnapshot.hasError) {
+                return Center(child: Text('Error: ${userSnapshot.error}'));
+              }
+              if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
+                return Center(child: Text('User not found'));
+              }
+
+              Map<String, dynamic> userData = userSnapshot.data!.data() as Map<String, dynamic>;
+              String username = userData['username'] ?? 'Anonymous';
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 1.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: Color.fromARGB(255, 255, 255, 255)), // Add bottom border here
+                    ),
                   ),
-                ],
-              ),
-            ),
+                  child: ListTile(
+                    tileColor: Colors.transparent, // Make background transparent
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
+                    title: Text(
+                      username,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 5),
+                        Text(
+                          data['content'],
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.thumb_up, color: const Color.fromARGB(255, 0, 0, 0)),
+                                SizedBox(width: 3), // Adjust space here
+                                Text(
+                                  data['upvotes'].toString(),
+                                  style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
+                                ),
+                              ],
+                            ),
+                            SizedBox(width: 15), // Adjust space between icon sets here
+                            Row(
+                              children: [
+                                Icon(Icons.comment, color: const Color.fromARGB(255, 0, 0, 0)),
+                                SizedBox(width: 3), // Adjust space here
+                                Text(
+                                  data['comments'].isNotEmpty ? '1' : '0',
+                                  style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
+                                ),
+                              ],
+                            ),
+                            SizedBox(width: 15), // Adjust space between icon sets here
+                            Row(
+                              children: [
+                                Icon(Icons.save, color: const Color.fromARGB(255, 0, 0, 0)),
+                                SizedBox(width: 3), // Adjust space here
+                                Text(
+                                  data['saved'] ? '1' : '0',
+                                  style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    isThreeLine: true,
+                  ),
+                ),
+              );
+            },
           );
         }).toList(),
       );
