@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:ovie/widgets/background_gradient.dart';
 import 'package:ovie/pages/chat/chat_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CommunityPage extends StatefulWidget {
   @override
@@ -12,6 +14,7 @@ class _CommunityPageState extends State<CommunityPage> with SingleTickerProvider
   bool _isDrawerOpen = false;
   String _selectedCommunity = 'My Communities';
   bool _isPostsSelected = true; // Add this variable to track the selected tab
+  late Future<QuerySnapshot> _postsFuture;
 
   @override
   void initState() {
@@ -20,7 +23,15 @@ class _CommunityPageState extends State<CommunityPage> with SingleTickerProvider
       vsync: this,
       duration: Duration(milliseconds: 250),
     );
+    _postsFuture = _fetchPosts();
   }
+
+Future<QuerySnapshot> _fetchPosts() {
+  return FirebaseFirestore.instance
+      .collection('posts')
+      .orderBy('timestamp', descending: true)
+      .get();
+}
 
   void _toggleDrawer() {
     setState(() {
@@ -38,6 +49,59 @@ class _CommunityPageState extends State<CommunityPage> with SingleTickerProvider
       _isPostsSelected = isPosts;
     });
   }
+
+  Future<void> _refreshPosts() async {
+    setState(() {
+      _postsFuture = _fetchPosts();
+    });
+  }
+
+ void _showAddPostDialog() {
+  TextEditingController _postController = TextEditingController();
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text('Write post here'),
+        content: TextField(
+          controller: _postController,
+          maxLength: 600,
+          maxLines: 5,
+          decoration: InputDecoration(hintText: 'Write post here'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              User? user = FirebaseAuth.instance.currentUser;
+              if (user != null) {
+                await FirebaseFirestore.instance.collection('posts').add({
+                  'content': _postController.text,
+                  'timestamp': FieldValue.serverTimestamp(),
+                  'upvotes': 0,
+                  'comments': [],
+                  'replies': [],
+                  'saved': false,
+                  'userId': user.uid,
+                  'username': user.displayName ?? 'Anonymous',
+                });
+                Navigator.of(context).pop();
+                _refreshPosts();
+              }
+            },
+            child: Text('Post'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +130,7 @@ class _CommunityPageState extends State<CommunityPage> with SingleTickerProvider
               appBar: AppBar(
                 backgroundColor: Color.fromARGB(255, 252, 208, 208),
                 elevation: 0,
-                                automaticallyImplyLeading: false,
+                automaticallyImplyLeading: false,
                 title: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -100,6 +164,10 @@ class _CommunityPageState extends State<CommunityPage> with SingleTickerProvider
                         ),
                         SizedBox(width: 20),
                         IconButton(
+                          icon: Icon(Icons.refresh, color: Colors.black),
+                          onPressed: _refreshPosts,
+                        ),
+                        IconButton(
                           icon: Icon(Icons.send, color: Colors.black),
                           onPressed: () {
                             Navigator.push(
@@ -115,7 +183,7 @@ class _CommunityPageState extends State<CommunityPage> with SingleTickerProvider
               ),
               body: _isPostsSelected ? _buildPostsContent() : _buildSavedContent(), // Change content based on selected tab
               floatingActionButton: FloatingActionButton(
-                onPressed: () => print('tapped +'),
+                onPressed: _showAddPostDialog,
                 child: Icon(Icons.add),
                 backgroundColor: const Color.fromARGB(255, 248, 207, 221),
               ),
@@ -127,9 +195,74 @@ class _CommunityPageState extends State<CommunityPage> with SingleTickerProvider
     );
   }
 
-  Widget _buildPostsContent() {
-    return Center(child: Text('Posts Content')); // Replace with actual posts content
-  }
+ Widget _buildPostsContent() {
+  return FutureBuilder<QuerySnapshot>(
+    future: _postsFuture,
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Center(child: CircularProgressIndicator());
+      }
+      if (snapshot.hasError) {
+        return Center(child: Text('Error: ${snapshot.error}'));
+      }
+      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        return Center(child: Text('No posts available.'));
+      }
+      return ListView(
+        children: snapshot.data!.docs.map((doc) {
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+          // Check if 'content' exists in the document data
+          if (!data.containsKey('content')) {
+            return Container(); // Skip this document if 'content' field is missing
+          }
+          return Card(
+            margin: EdgeInsets.all(10),
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(data['username'] ?? 'Unknown', style: TextStyle(fontWeight: FontWeight.bold)),
+                  SizedBox(height: 5),
+                  Text(data['content']),
+                  SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          IconButton(icon: Icon(Icons.thumb_up), onPressed: () {}),
+                          SizedBox(width: 5),
+                          Text(data['upvotes'].toString()), // Upvotes count
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          IconButton(icon: Icon(Icons.comment), onPressed: () {}),
+                          SizedBox(width: 5),
+                          Text(data['comments'] != '' ? '1' : '0'), // Comments count
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          IconButton(icon: Icon(Icons.save), onPressed: () {}),
+                          SizedBox(width: 5),
+                          Text(data['saved'] ? '1' : '0'), // Saves count
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+      );
+    },
+  );
+}
+
+
 
   Widget _buildSavedContent() {
     return Center(child: Text('Saved Content')); // Replace with actual saved content

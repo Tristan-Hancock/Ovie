@@ -5,7 +5,7 @@ import 'widgets/bottom_navigation.dart';
 import 'widgets/background_gradient.dart';
 import 'pages/home_page.dart';
 import 'pages/calendar_page.dart';
-import 'pages/communites.dart';
+import 'pages/communityscreen/communites.dart';
 import 'pages/important_intro/intro_check.dart';
 import 'pages/important_intro/intro_screen.dart';
 import 'pages/useraccount/Authpage.dart';
