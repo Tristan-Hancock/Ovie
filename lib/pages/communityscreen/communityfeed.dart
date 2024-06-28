@@ -3,7 +3,7 @@ import 'package:ovie/widgets/background_gradient.dart';
 import 'package:ovie/pages/chat/chat_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'communitymenu.dart';
 class CommunityPage extends StatefulWidget {
   @override
   _CommunityPageState createState() => _CommunityPageState();
@@ -12,7 +12,7 @@ class CommunityPage extends StatefulWidget {
 class _CommunityPageState extends State<CommunityPage> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   bool _isDrawerOpen = false;
-  String _selectedCommunity = 'My Communities';
+  String _selectedCommunity = 'Your Communities';
   bool _isPostsSelected = true; // Add this variable to track the selected tab
   late Future<QuerySnapshot> _postsFuture;
 
@@ -106,20 +106,30 @@ Future<QuerySnapshot> _fetchPosts() {
 
 
 
-  @override
-  Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        body: Stack(
-          children: [
-            _buildMainContent(),
-            _buildDrawer(),
-          ],
-        ),
+@override
+Widget build(BuildContext context) {
+  return DefaultTabController(
+    length: 2,
+    child: Scaffold(
+      body: Stack(
+        children: [
+          _buildMainContent(),
+          CommunityMenu(
+            animationController: _animationController,
+            isDrawerOpen: _isDrawerOpen,
+            selectedCommunity: _selectedCommunity,
+            onCommunitySelected: (String newValue) {
+              setState(() {
+                _selectedCommunity = newValue;
+              });
+            },
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _buildMainContent() {
     return AnimatedBuilder(
@@ -274,7 +284,16 @@ Widget _buildPostsContent() {
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.thumb_up, color: const Color.fromARGB(255, 0, 0, 0)),
+                                GestureDetector(
+                                  onTap: () {
+                                    // Add upvote functionality here
+                                  },
+                                  child: Image.asset(
+                                    'assets/images/upvote.png',
+                                    height: 20.0,
+                                    width: 20.0,
+                                  ),
+                                ),
                                 SizedBox(width: 3), // Adjust space here
                                 Text(
                                   data['upvotes'].toString(),
@@ -285,7 +304,16 @@ Widget _buildPostsContent() {
                             SizedBox(width: 15), // Adjust space between icon sets here
                             Row(
                               children: [
-                                Icon(Icons.comment, color: const Color.fromARGB(255, 0, 0, 0)),
+                                GestureDetector(
+                                  onTap: () {
+                                    // Add comment functionality here
+                                  },
+                                  child: Image.asset(
+                                    'assets/images/chaticon.png',
+                                    height: 20.0,
+                                    width: 20.0,
+                                  ),
+                                ),
                                 SizedBox(width: 3), // Adjust space here
                                 Text(
                                   data['comments'].isNotEmpty ? '1' : '0',
@@ -296,7 +324,16 @@ Widget _buildPostsContent() {
                             SizedBox(width: 15), // Adjust space between icon sets here
                             Row(
                               children: [
-                                Icon(Icons.save, color: const Color.fromARGB(255, 0, 0, 0)),
+                                GestureDetector(
+                                  onTap: () {
+                                    print('send messsage click');
+                                  },
+                                  child: Image.asset(
+                                    'assets/images/sendtoDM.png',
+                                    height: 20.0,
+                                    width: 20.0,
+                                  ),
+                                ),
                                 SizedBox(width: 3), // Adjust space here
                                 Text(
                                   data['saved'] ? '1' : '0',
@@ -321,92 +358,11 @@ Widget _buildPostsContent() {
 }
 
 
-
   Widget _buildSavedContent() {
     return Center(child: Text('Saved Content')); // Replace with actual saved content
   }
 
-  Widget _buildDrawer() {
-    return AnimatedBuilder(
-      animation: _animationController,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(-250 * (1 - _animationController.value), 0),
-          child: BackgroundGradient(
-            child: Container(
-              width: 250,
-              child: SafeArea(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          DropdownButton<String>(
-                            value: _selectedCommunity,
-                            icon: Icon(Icons.arrow_drop_down, color: Colors.black),
-                            iconSize: 24,
-                            elevation: 16,
-                            style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
-                            dropdownColor: Color.fromARGB(255, 252, 208, 208),
-                            underline: Container(
-                              height: 2,
-                              color: Colors.transparent,
-                            ),
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                _selectedCommunity = newValue!;
-                              });
-                            },
-                            items: <String>['My Communities', 'All Communities']
-                                .map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: ListView(
-                        padding: EdgeInsets.all(16.0),
-                        children: _selectedCommunity == 'My Communities'
-                            ? [
-                                _buildCommunityItem('Safe sex'),
-                              ]
-                            : [
-                                _buildCommunityItem('Menstrual Cycle'),
-                                _buildCommunityItem('Safe sex'),
-                                _buildCommunityItem('Birth Control'),
-                                _buildCommunityItem('Cramps'),
-                                _buildCommunityItem('Puberty'),
-                              ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildCommunityItem(String communityName) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: Text(
-        communityName,
-        style: TextStyle(fontSize: 18, color: Colors.black),
-      ),
-    );
-  }
-
+  
   @override
   void dispose() {
     _animationController.dispose();
