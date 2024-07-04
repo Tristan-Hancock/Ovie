@@ -53,13 +53,13 @@ class _CommunityMenuState extends State<CommunityMenu> {
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: const Color.fromARGB(255, 0, 0, 0),
                             ),
                           ),
                           IconButton(
                             icon: Icon(
                               _isYourCommunities ? Icons.group : Icons.public,
-                              color: Colors.white,
+                              color: const Color.fromARGB(255, 0, 0, 0),
                             ),
                             onPressed: () {
                               setState(() {
@@ -71,10 +71,10 @@ class _CommunityMenuState extends State<CommunityMenu> {
                       ),
                     ),
                     ListTile(
-                      leading: Icon(Icons.add, color: Colors.white),
+                      leading: Icon(Icons.add, color: const Color.fromARGB(255, 0, 0, 0)),
                       title: Text(
                         'Create a community',
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
                       ),
                       onTap: () {
                         _showCreateCommunityDialog(context);
@@ -122,12 +122,12 @@ Widget _buildCommunityItem(BuildContext context, DocumentSnapshot community) {
       return ListTile(
         title: Text(
           communityName,
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.black),
         ),
         trailing: IconButton(
           icon: Icon(
             isJoined ? Icons.star : Icons.star_border,
-            color: Colors.white,
+            color: Colors.black,
           ),
           onPressed: () async {
             if (isJoined) {
