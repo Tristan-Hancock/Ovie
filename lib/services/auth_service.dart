@@ -5,7 +5,43 @@ import 'package:google_sign_in/google_sign_in.dart';
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final CollectionReference users = FirebaseFirestore.instance.collection('users');
-
+Future<void> joinCommunity(String communityId) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      await users.doc(user.uid).update({
+        'joinedCommunities': FieldValue.arrayUnion([communityId])
+      });
+    }
+  }
+   Future<void> leaveCommunity(String communityId) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      await users.doc(user.uid).update({
+        'joinedCommunities': FieldValue.arrayRemove([communityId])
+      });
+    }
+  }
+   Future<QuerySnapshot> getJoinedCommunities() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      DocumentSnapshot userDoc = await users.doc(user.uid).get();
+      List joinedCommunities = userDoc['joinedCommunities'] ?? [];
+      return FirebaseFirestore.instance
+          .collection('communities')
+          .where(FieldPath.documentId, whereIn: joinedCommunities)
+          .get();
+    }
+    return FirebaseFirestore.instance.collection('communities').get();
+  }
+    Future<bool> isCommunityJoined(String communityId) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      DocumentSnapshot userDoc = await users.doc(user.uid).get();
+      List joinedCommunities = userDoc['joinedCommunities'] ?? [];
+      return joinedCommunities.contains(communityId);
+    }
+    return false;
+  }
   Future<User?> signUpWithEmail(String email, String password, String username) async {
     try {
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(

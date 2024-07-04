@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -21,14 +23,15 @@ void main() async {
   bool showIntro = await IntroCheck.isFirstTime(); // Check if it's the first time
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  runApp(MyApp(showIntro: showIntro));
+  User? currentUser = FirebaseAuth.instance.currentUser;
+runApp(MyApp(showIntro: showIntro, isLoggedIn: currentUser !=null));
 }
 
 class MyApp extends StatelessWidget {
   final bool showIntro;
+  final bool isLoggedIn;
 
-  MyApp({required this.showIntro});
+  MyApp({required this.showIntro, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +40,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
- initialRoute: '/',
+ initialRoute: _initialRoute(),
       routes: {
         '/': (context) => AuthPage(), // Ensure the root route is defined
   //need to fix this routing to stop showing the intro
@@ -48,6 +51,14 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => ProfilePage(),
       },
     );
+  }
+  String _initialRoute(){
+    if (isLoggedIn){
+      return showIntro ? '/intro' : '/home';
+
+    }else {
+      return '/';
+    }
   }
 }
 

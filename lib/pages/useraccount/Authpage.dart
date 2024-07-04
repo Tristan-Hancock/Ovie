@@ -15,9 +15,23 @@ class _AuthPageState extends State<AuthPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   bool _isSignIn = true; // Toggle between sign-in and sign-up
-
-  @override
-  Widget build(BuildContext context) {
+@override
+Widget build(BuildContext context) {
+  return StreamBuilder<User?>(
+    stream: FirebaseAuth.instance.authStateChanges(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        );
+      } else if (snapshot.hasData) {
+        // User is logged in, navigate to MainScreen
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          bool showIntro = await IntroCheck.isFirstTime();
+          Navigator.pushReplacementNamed(context, showIntro ? '/intro' : '/home');
+        });
+        return Container(); // Placeholder while navigating
+      } else {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -132,4 +146,7 @@ class _AuthPageState extends State<AuthPage> {
       ),
     );
   }
-}
+    
+});
+
+}}

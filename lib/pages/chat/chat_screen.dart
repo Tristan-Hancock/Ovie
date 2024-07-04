@@ -39,7 +39,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 Navigator.pop(context);
               },
             ),
-            title: Text('Chat', style: TextStyle(color: Colors.black)),
+            title: Text('Global Chat', style: TextStyle(color: Colors.black)),
           ),
           body: Column(
             children: [
