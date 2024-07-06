@@ -3,8 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:ovie/widgets/background_gradient.dart';
 import 'package:ovie/services/auth_service.dart'; // Import your AuthService
-import 'package:ovie/pages/communityscreen/communityposts.dart';
-import 'package:ovie/pages/communityscreen/communityposts.dart';
+
 class CommunityMenu extends StatefulWidget {
   final AnimationController animationController;
   final bool isDrawerOpen;
