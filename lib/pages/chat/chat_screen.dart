@@ -59,7 +59,6 @@ class _ChatScreenState extends State<ChatScreen> {
                       var userData = doc.data() as Map<String, dynamic>;
                       return ListTile(
                         title: Text(userData['username'] ?? 'Unknown'),
-                        subtitle: Text(userData['email'] ?? 'No email'),
                         onTap: () {
                           _startChat(context, doc.id, userData['username']);
                         },
