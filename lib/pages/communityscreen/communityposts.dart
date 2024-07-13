@@ -3,15 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ovie/widgets/background_gradient.dart'; // Import the custom background gradient
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ovie/pages/communityscreen/create_posts.dart';
+import 'community_comments.dart'; // Import the new comments page
 
 class CommunityPostsOverlay extends StatelessWidget {
   final String communityId;
   final VoidCallback onClose;
 
   CommunityPostsOverlay({required this.communityId, required this.onClose});
-
- 
-
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +80,7 @@ class CommunityPostsOverlay extends StatelessWidget {
                             .orderBy('timestamp', descending: true)
                             .snapshots(),
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
+                                                    if (snapshot.connectionState ==
                               ConnectionState.waiting) {
                             return Center(child: CircularProgressIndicator());
                           }
@@ -137,7 +135,8 @@ class CommunityPostsOverlay extends StatelessWidget {
                                                 SizedBox(width: 3),
                                                 Text(
                                                   postData['upvotes'].toString(),
-                                                  style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
+                                                  style: TextStyle(
+                                                    color: const Color.fromARGB(255, 0, 0, 0)),
                                                 ),
                                               ],
                                             ),
@@ -146,7 +145,19 @@ class CommunityPostsOverlay extends StatelessWidget {
                                               children: [
                                                 GestureDetector(
                                                   onTap: () {
-                                                    // Add comment functionality here
+                                                    // Navigate to comments page
+                                                    showModalBottomSheet(
+                                                      context: context,
+                                                      isScrollControlled: true,
+                                                      backgroundColor: Colors.transparent,
+                                                      builder: (context) => Padding(
+                                                        padding: const EdgeInsets.only(top: 50.0),
+                                                        child: CommunityCommentsPage(
+                                                          communityId: communityId,
+                                                          postId: doc.id,
+                                                        ),
+                                                      ),
+                                                    );
                                                   },
                                                   child: Image.asset(
                                                     'assets/images/chaticon.png',
@@ -156,7 +167,9 @@ class CommunityPostsOverlay extends StatelessWidget {
                                                 ),
                                                 SizedBox(width: 3),
                                                 Text(
-                                                  postData['comments'].isNotEmpty ? '1' : '0',
+                                                  postData['comments'] != null && postData['comments'].isNotEmpty
+                                                      ? postData['comments'].length.toString()
+                                                      : '0',
                                                   style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
                                                 ),
                                               ],
@@ -200,7 +213,7 @@ class CommunityPostsOverlay extends StatelessWidget {
             },
           ),
           floatingActionButton: FloatingActionButton(
-            onPressed: () =>  showAddPostDialog(context, communityId),
+            onPressed: () => showAddPostDialog(context, communityId),
             child: Icon(Icons.add),
             backgroundColor: const Color.fromARGB(255, 248, 207, 221),
           ),
@@ -210,3 +223,4 @@ class CommunityPostsOverlay extends StatelessWidget {
     );
   }
 }
+
