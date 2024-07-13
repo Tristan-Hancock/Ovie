@@ -2,7 +2,55 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ovie/widgets/background_gradient.dart';
+import 'package:intl/intl.dart'; 
 
+class MessageBubble extends StatelessWidget {
+  final String message;
+  final bool isMe;
+  final Timestamp timestamp;
+
+  MessageBubble({required this.message, required this.isMe, required this.timestamp});
+
+  String _formatTimestamp(Timestamp timestamp) {
+    DateTime dateTime = timestamp.toDate();
+    return DateFormat('MMM d, h:mm a').format(dateTime);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+        decoration: BoxDecoration(
+          color: isMe ? Colors.white : Colors.grey[700],
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              message,
+              style: TextStyle(
+                color: isMe ? Colors.black : Colors.white,
+              ),
+            ),
+            SizedBox(height: 4),
+            Text(
+              _formatTimestamp(timestamp),
+              style: TextStyle(
+                color: isMe ? Colors.black54 : Colors.white70,
+                fontSize: 10,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 class PrivateChatScreen extends StatefulWidget {
   final String chatId;
   final String peerId;
@@ -64,40 +112,36 @@ class _PrivateChatScreenState extends State<PrivateChatScreen> {
               backgroundColor: Color.fromARGB(255, 252, 208, 208),
             ),
             Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('chats')
-                    .doc(widget.chatId)
-                    .collection('messages')
-                    .orderBy('timestamp', descending: true)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return Center(child: Text('No messages.'));
-                  }
-                  return ListView(
-                    reverse: true,
-                    children: snapshot.data!.docs.map((doc) {
-                      var messageData = doc.data() as Map<String, dynamic>;
-                      bool isMe = messageData['senderId'] ==
-                          FirebaseAuth.instance.currentUser!.uid;
-                      return ListTile(
-                        title: Text(
-                          messageData['text'],
-                          textAlign: isMe ? TextAlign.end : TextAlign.start,
-                          style: TextStyle(
-                            color: isMe ? Colors.blue : Colors.black,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  );
-                },
-              ),
-            ),
+  child: StreamBuilder<QuerySnapshot>(
+    stream: FirebaseFirestore.instance
+        .collection('chats')
+        .doc(widget.chatId)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .snapshots(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Center(child: CircularProgressIndicator());
+      }
+      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        return Center(child: Text('No messages.'));
+      }
+      return ListView(
+        reverse: true,
+        children: snapshot.data!.docs.map((doc) {
+          var messageData = doc.data() as Map<String, dynamic>;
+          bool isMe = messageData['senderId'] ==
+              FirebaseAuth.instance.currentUser!.uid;
+          return MessageBubble(
+            message: messageData['text'],
+            isMe: isMe,
+            timestamp: messageData['timestamp'],
+          );
+        }).toList(),
+      );
+    },
+  ),
+),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(

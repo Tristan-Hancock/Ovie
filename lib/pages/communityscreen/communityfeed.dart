@@ -71,6 +71,17 @@ class _CommunityPageState extends State<CommunityPage> with SingleTickerProvider
       _selectedCommunityId = null;
     });
   }
+void _showComments(String postId) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) => Padding(
+      padding: const EdgeInsets.only(top: 50.0), // Adjust the top padding as needed
+      child: CommentsPage(postId: postId),
+    ),
+  );
+}
 
   void _showAddPostDialog() {
     TextEditingController _postController = TextEditingController();
@@ -323,22 +334,19 @@ class _CommunityPageState extends State<CommunityPage> with SingleTickerProvider
                               SizedBox(width: 15), // Adjust space between icon sets here
                               Row(
                                 children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      // Add comment functionality here
-                                      print('comment button clicked');
-                                      showModalBottomSheet(
-                                        context: context,
-                                        isScrollControlled: true,
-                                        builder: (context) => CommentsPage(postId: doc.id),
-                                      );
-                                    },
-                                    child: Image.asset(
-                                      'assets/images/chaticon.png',
-                                      height: 20.0,
-                                      width: 20.0,
-                                    ),
-                                  ),
+                                GestureDetector(
+  onTap: () {
+    // Add comment functionality here
+    print('comment button clicked');
+    _showComments(doc.id);  // Call the _showComments function with the post ID
+  },
+  child: Image.asset(
+    'assets/images/chaticon.png',
+    height: 20.0,
+    width: 20.0,
+  ),
+),
+
                                   SizedBox(width: 3), // Adjust space here
                                   Text(
                                     data['comments'].isNotEmpty ? '1' : '0',
