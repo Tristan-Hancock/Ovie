@@ -173,30 +173,31 @@ class _CommentsPageState extends State<CommentsPage> {
                   },
                 ),
               ),
-              AnimatedPadding(
+              Padding(
                 padding: MediaQuery.of(context).viewInsets,
-                duration: const Duration(milliseconds: 100),
-                curve: Curves.decelerate,
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
                     children: [
                       Expanded(
-                        child: TextField(
-                          controller: _commentController,
-                          focusNode: _focusNode,
-                          decoration: InputDecoration(
-                            hintText: 'Add a comment...',
-                            filled: true,
-                            fillColor: Colors.grey[800],
-                            hintStyle: TextStyle(color: Colors.grey),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30.0),
-                              borderSide: BorderSide.none,
-                            ),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[800],
+                            borderRadius: BorderRadius.circular(30.0),
                           ),
-                          style: TextStyle(color: Colors.white),
+                          padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+                          child: TextField(
+                            controller: _commentController,
+                            focusNode: _focusNode,
+                            minLines: 1,
+                            maxLines: 5,
+                            decoration: InputDecoration(
+                              hintText: 'Add a comment...',
+                              hintStyle: TextStyle(color: Colors.grey),
+                              border: InputBorder.none,
+                            ),
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                       ),
                       IconButton(
