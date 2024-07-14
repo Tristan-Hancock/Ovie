@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'communitymenu.dart';
 import 'communityposts.dart';
 import 'package:ovie/pages/communityscreen/postactions/comments.dart';
+import 'package:ovie/widgets/chat_icons.dart'; // Adjust the import as per your project structure
 
 class CommunityPage extends StatefulWidget {
   @override
@@ -238,158 +239,159 @@ void _showComments(String postId) {
     );
   }
 
-  Widget _buildPostsContent() {
-    return FutureBuilder<QuerySnapshot>(
-      future: _postsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text('No posts available.'));
-        }
+Widget _buildPostsContent() {
+  return FutureBuilder<QuerySnapshot>(
+    future: _postsFuture,
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Center(child: CircularProgressIndicator());
+      }
+      if (snapshot.hasError) {
+        return Center(child: Text('Error: ${snapshot.error}'));
+      }
+      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        return Center(child: Text('No posts available.'));
+      }
 
-        print("Fetched ${snapshot.data!.docs.length} posts"); // Print statement
+      print("Fetched ${snapshot.data!.docs.length} posts"); // Print statement
 
-        return ListView(
-          padding: EdgeInsets.zero,
-          children: snapshot.data!.docs.map((doc) {
-            Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-            print("Post data: $data"); // Print statement
+      return ListView(
+        padding: EdgeInsets.zero,
+        children: snapshot.data!.docs.map((doc) {
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+          print("Post data: $data"); // Print statement
 
-            // Check if 'content' exists in the document data
-            if (!data.containsKey('content')) {
-              print("Skipping post with missing content field: ${doc.id}"); // Print statement
-              return Container(); // Skip this document if 'content' field is missing
-            }
+          // Check if 'content' exists in the document data
+          if (!data.containsKey('content')) {
+            print("Skipping post with missing content field: ${doc.id}"); // Print statement
+            return Container(); // Skip this document if 'content' field is missing
+          }
 
-            return FutureBuilder<DocumentSnapshot>(
-              future: FirebaseFirestore.instance.collection('users').doc(data['userId']).get(),
-              builder: (context, userSnapshot) {
-                if (userSnapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                if (userSnapshot.hasError) {
-                  return Center(child: Text('Error: ${userSnapshot.error}'));
-                }
-                if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
-                  return Center(child: Text('User not found'));
-                }
+          return FutureBuilder<DocumentSnapshot>(
+            future: FirebaseFirestore.instance.collection('users').doc(data['userId']).get(),
+            builder: (context, userSnapshot) {
+              if (userSnapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+              if (userSnapshot.hasError) {
+                return Center(child: Text('Error: ${userSnapshot.error}'));
+              }
+              if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
+                return Center(child: Text('User not found'));
+              }
 
-                Map<String, dynamic> userData = userSnapshot.data!.data() as Map<String, dynamic>;
-                String username = userData['username'] ?? 'Anonymous';
+              Map<String, dynamic> userData = userSnapshot.data!.data() as Map<String, dynamic>;
+              String username = userData['username'] ?? 'Anonymous';
 
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 1.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(color: Color.fromARGB(255, 255, 255, 255)), // Add bottom border here
-                      ),
-                    ),
-                    child: ListTile(
-                      tileColor: Colors.transparent, // Make background transparent
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
-                      title: Text(
-                        username,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(height: 5),
-                          Text(
-                            data['content'],
-                            style: TextStyle(color: Colors.black),
-                          ),
-                          SizedBox(height: 10),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      // Add upvote functionality here
-                                    },
-                                    child: Image.asset(
-                                      'assets/images/upvote.png',
-                                      height: 20.0,
-                                      width: 20.0,
-                                    ),
-                                  ),
-                                  SizedBox(width: 3), // Adjust space here
-                                  Text(
-                                    data['upvotes'].toString(),
-                                    style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(width: 15), // Adjust space between icon sets here
-                              Row(
-                                children: [
-                                GestureDetector(
-  onTap: () {
-    // Add comment functionality here
-    print('comment button clicked');
-    _showComments(doc.id);  // Call the _showComments function with the post ID
-  },
-  child: Image.asset(
-    'assets/images/chaticon.png',
-    height: 20.0,
-    width: 20.0,
-  ),
-),
-
-                                  SizedBox(width: 3), // Adjust space here
-                                  Text(
-                                    data['comments'].isNotEmpty ? '1' : '0',
-                                    style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(width: 15), // Adjust space between icon sets here
-                              Row(
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      print('send messsage click');
-                                    },
-                                    child: Image.asset(
-                                      'assets/images/sendtoDM.png',
-                                      height: 20.0,
-                                      width: 20.0,
-                                    ),
-                                  ),
-                                  SizedBox(width: 3), // Adjust space here
-                                  Text(
-                                    data['saved'] ? '1' : '0',
-                                    style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      isThreeLine: true,
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 1.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: Color.fromARGB(255, 255, 255, 255)), // Add bottom border here
                     ),
                   ),
-                );
-              },
-            );
-          }).toList(),
-        );
-      },
-    );
-  }
-
+                  child: ListTile(
+                    tileColor: Colors.transparent, // Make background transparent
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
+                    title: Text(
+                      username,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 5),
+                        Text(
+                          data['content'],
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    // Add upvote functionality here
+                                  },
+                                  child: Icon(
+                                    Chat.heart,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                                SizedBox(width: 3), // Adjust space here
+                                Text(
+                                  data['upvotes'].toString(),
+                                  style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
+                                ),
+                              ],
+                            ),
+                            SizedBox(width: 15), // Adjust space between icon sets here
+                            Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    // Add comment functionality here
+                                    print('comment button clicked');
+                                    _showComments(doc.id);  // Call the _showComments function with the post ID
+                                  },
+                                  child: Icon(Chat.comment, color: Colors.black),
+                                ),
+                                SizedBox(width: 3), // Adjust space here
+                                Text(
+                                  data['comments'].isNotEmpty ? '1' : '0',
+                                  style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
+                                ),
+                              ],
+                            ),
+                            SizedBox(width: 15), // Adjust space between icon sets here
+                            Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    print('send message click');
+                                  },
+                                  child: Icon(Chat.paper_plane, color: Colors.black),
+                                ),
+                                SizedBox(width: 3), // Adjust space here
+                                Text(
+                                  data['saved'] ? '1' : '0',
+                                  style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
+                                ),
+                              ],
+                            ),
+                            SizedBox(width: 15), // Adjust space between icon sets here
+                            Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    // Add share functionality here
+                                    print('share button clicked');
+                                  },
+                                  child: Icon(Chat.forward, color: Colors.black),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    isThreeLine: true,
+                  ),
+                ),
+              );
+            },
+          );
+        }).toList(),
+      );
+    },
+  );
+}
   Widget _buildSavedContent() {
     return Center(child: Text('No Saves Added')); // Replace with actual saved content
   }
