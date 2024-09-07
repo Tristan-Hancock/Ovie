@@ -162,82 +162,79 @@ void _showComments(String postId) {
     );
   }
 
-  Widget _buildMainContent() {
-    return AnimatedBuilder(
-      animation: _animationController,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(250 * _animationController.value, 0),
-          child: BackgroundGradient(
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
-              appBar: AppBar(
-                backgroundColor: Color.fromARGB(255, 252, 208, 208),
-                elevation: 0,
-                automaticallyImplyLeading: false,
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.menu, color: Colors.black),
-                      onPressed: _toggleDrawer,
-                    ),
-                    Spacer(),
-                    Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () => _selectTab(true), // Set the state to show posts
-                          child: Text(
-                            'Posts',
-                            style: TextStyle(
-                              color: _isPostsSelected ? Colors.black : Colors.grey, // Highlight selected tab
-                              fontWeight: _isPostsSelected ? FontWeight.bold : FontWeight.normal,
-                            ),
+Widget _buildMainContent() {
+  return AnimatedBuilder(
+    animation: _animationController,
+    builder: (context, child) {
+      return Transform.translate(
+        offset: Offset(250 * _animationController.value, 0),
+        child: BackgroundGradient(
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            appBar: AppBar(
+              backgroundColor: Color(0xFF010101), // Black background
+              elevation: 0,
+              automaticallyImplyLeading: false,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                IconButton(
+  padding: EdgeInsets.only(left: 0), // No padding on the left to push it to the edge
+  icon: Icon(Icons.menu, color: Colors.white),
+  onPressed: _toggleDrawer,
+),
+
+                  Spacer(),
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => _selectTab(true), // Set the state to show posts
+                        child: Text(
+                          'Posts',
+                          style: TextStyle(
+                            color: _isPostsSelected ? Color(0xFFF46AA0) : Colors.white, // Pink for selected, white for unselected
+                            fontWeight: _isPostsSelected ? FontWeight.bold : FontWeight.normal,
                           ),
                         ),
-                        SizedBox(width: 20),
-                        GestureDetector(
-                          onTap: () => _selectTab(false), // Set the state to show saved
-                          child: Text(
-                            'Saved',
-                            style: TextStyle(
-                              color: !_isPostsSelected ? Colors.black : Colors.grey, // Highlight selected tab
-                              fontWeight: !_isPostsSelected ? FontWeight.bold : FontWeight.normal,
-                            ),
+                      ),
+                      SizedBox(width: 20),
+                      GestureDetector(
+                        onTap: () => _selectTab(false), // Set the state to show saved
+                        child: Text(
+                          'Saved',
+                          style: TextStyle(
+                            color: !_isPostsSelected ? Color(0xFFF46AA0) : Colors.white, // Pink for selected, white for unselected
+                            fontWeight: !_isPostsSelected ? FontWeight.bold : FontWeight.normal,
                           ),
                         ),
-                        SizedBox(width: 20),
-                        IconButton(
-                          icon: Icon(Icons.refresh, color: Colors.black),
-                          onPressed: _refreshPosts,
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.send, color: Colors.black),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => ChatScreen()),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                      SizedBox(width: 20),
+                      IconButton(
+                        icon: Icon(Icons.refresh, color: Colors.white), // White icon color
+                        onPressed: _refreshPosts,
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.message, color: Colors.white), // Changed from send to message icon
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => ChatScreen()),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              body: _isPostsSelected ? _buildPostsContent() : _buildSavedContent(), // Change content based on selected tab
-              floatingActionButton: FloatingActionButton(
-                onPressed: _showAddPostDialog,
-                child: Icon(Icons.add),
-                backgroundColor: const Color.fromARGB(255, 248, 207, 221),
-              ),
-              floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
             ),
+            body: _isPostsSelected ? _buildPostsContent() : _buildSavedContent(), // Change content based on selected tab
+        
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 
 Widget _buildPostsContent() {
   return FutureBuilder<QuerySnapshot>(
@@ -247,25 +244,16 @@ Widget _buildPostsContent() {
         return Center(child: CircularProgressIndicator());
       }
       if (snapshot.hasError) {
-        return Center(child: Text('Error: ${snapshot.error}'));
+        return Center(child: Text('Error: ${snapshot.error}', style: TextStyle(color: Colors.white)));
       }
       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-        return Center(child: Text('No posts available.'));
+        return Center(child: Text('No posts available.', style: TextStyle(color: Colors.white)));
       }
 
-      print("Fetched ${snapshot.data!.docs.length} posts"); // Print statement
-
       return ListView(
-        padding: EdgeInsets.zero,
+        padding: EdgeInsets.zero, // No padding at the top or bottom of the posts
         children: snapshot.data!.docs.map((doc) {
           Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-          print("Post data: $data"); // Print statement
-
-          // Check if 'content' exists in the document data
-          if (!data.containsKey('content')) {
-            print("Skipping post with missing content field: ${doc.id}"); // Print statement
-            return Container(); // Skip this document if 'content' field is missing
-          }
 
           return FutureBuilder<DocumentSnapshot>(
             future: FirebaseFirestore.instance.collection('users').doc(data['userId']).get(),
@@ -274,31 +262,31 @@ Widget _buildPostsContent() {
                 return Center(child: CircularProgressIndicator());
               }
               if (userSnapshot.hasError) {
-                return Center(child: Text('Error: ${userSnapshot.error}'));
+                return Center(child: Text('Error: ${userSnapshot.error}', style: TextStyle(color: Colors.white)));
               }
               if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
-                return Center(child: Text('User not found'));
+                return Center(child: Text('User not found', style: TextStyle(color: Colors.white)));
               }
 
               Map<String, dynamic> userData = userSnapshot.data!.data() as Map<String, dynamic>;
               String username = userData['username'] ?? 'Anonymous';
 
               return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 1.0),
+                padding: EdgeInsets.symmetric(vertical: 4.0), // Minimal space between posts
                 child: Container(
                   decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(color: Color.fromARGB(255, 255, 255, 255)), // Add bottom border here
-                    ),
+                    color: Color(0xFF1C1C1C), // Darker color for post background
+                    borderRadius: BorderRadius.circular(8), // Slightly rounded corners
+                    border: Border.all(color: Colors.grey.shade700, width: 1),
                   ),
                   child: ListTile(
-                    tileColor: Colors.transparent, // Make background transparent
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
+                    tileColor: Colors.transparent,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0), // Consistent padding within the post
                     title: Text(
                       username,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: Colors.white,
                       ),
                     ),
                     subtitle: Column(
@@ -307,73 +295,52 @@ Widget _buildPostsContent() {
                         SizedBox(height: 5),
                         Text(
                           data['content'],
-                          style: TextStyle(color: Colors.black),
+                          style: TextStyle(color: Colors.grey[300]),
                         ),
-                        SizedBox(height: 10),
+                        SizedBox(height: 8), // Slightly reduced spacing
+                        // New icon row similar to Reddit's layout
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
                               children: [
-                                GestureDetector(
+                                _buildIconText(
+                                  icon: Icons.arrow_upward_rounded,
+                                  text: data['upvotes'].toString(),
+                                  color: Colors.pinkAccent,
                                   onTap: () {
-                                    // Add upvote functionality here
+                                    // Implement upvote functionality
                                   },
-                                  child: Icon(
-                                    Chat.heart,
-                                    color: Colors.red,
-                                  ),
                                 ),
-                                SizedBox(width: 3), // Adjust space here
-                                Text(
-                                  data['upvotes'].toString(),
-                                  style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
+                                SizedBox(width: 20),
+                                _buildIconText(
+                                  icon: Icons.arrow_downward_rounded,
+                                  text: '',
+                                  color: Colors.pinkAccent,
+                                  onTap: () {
+                                    // Implement downvote functionality
+                                  },
                                 ),
                               ],
                             ),
-                            SizedBox(width: 15), // Adjust space between icon sets here
                             Row(
                               children: [
-                                GestureDetector(
+                                _buildIconText(
+                                  icon: Icons.comment,
+                                  text: data['comments'].isNotEmpty ? data['comments'].length.toString() : '0',
+                                  color: Colors.pinkAccent,
                                   onTap: () {
-                                    // Add comment functionality here
-                                    print('comment button clicked');
-                                    _showComments(doc.id);  // Call the _showComments function with the post ID
+                                    _showComments(doc.id); // Call the _showComments function with the post ID
                                   },
-                                  child: Icon(Chat.comment, color: Colors.black),
                                 ),
-                                SizedBox(width: 3), // Adjust space here
-                                Text(
-                                  data['comments'].isNotEmpty ? '1' : '0',
-                                  style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
-                                ),
-                              ],
-                            ),
-                            SizedBox(width: 15), // Adjust space between icon sets here
-                            Row(
-                              children: [
-                                GestureDetector(
+                                SizedBox(width: 20),
+                                _buildIconText(
+                                  icon: Icons.share,
+                                  text: '',
+                                  color: Colors.pinkAccent,
                                   onTap: () {
-                                    print('send message click');
-                                  },
-                                  child: Icon(Chat.paper_plane, color: Colors.black),
-                                ),
-                                SizedBox(width: 3), // Adjust space here
-                                Text(
-                                  data['saved'] ? '1' : '0',
-                                  style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
-                                ),
-                              ],
-                            ),
-                            SizedBox(width: 15), // Adjust space between icon sets here
-                            Row(
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    // Add share functionality here
                                     print('share button clicked');
                                   },
-                                  child: Icon(Chat.forward, color: Colors.black),
                                 ),
                               ],
                             ),
@@ -390,6 +357,28 @@ Widget _buildPostsContent() {
         }).toList(),
       );
     },
+  );
+}
+
+
+Widget _buildIconText({
+  required IconData icon,
+  required String text,
+  required VoidCallback onTap,
+  required Color color,
+}) {
+  return GestureDetector(
+    onTap: onTap,
+    child: Row(
+      children: [
+        Icon(icon, color: color, size: 18), // Slightly smaller icon size
+        SizedBox(width: 3),
+        Text(
+          text,
+          style: TextStyle(color: color),
+        ),
+      ],
+    ),
   );
 }
   Widget _buildSavedContent() {

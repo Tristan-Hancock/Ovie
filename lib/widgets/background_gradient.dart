@@ -11,13 +11,14 @@ class BackgroundGradient extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Color(0xFFFCD9DA), // 31%
-            Color(0xFFDCAAC5), // 58%
-            Color(0xFFE5A2BD), // 82%
+            Color(0xFF011E3D), // Very dark blue at the top
+            Color(0xFF022C50), // Slightly lighter dark blue in the middle
+            Color(0xFF033D63), // A more muted darker blue
+            Color(0xFF044A7C), // Another dark blue for depth near the bottom
           ],
-          stops: [0.31, 0.58, 0.82],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
+          stops: [0.1, 0.4, 0.7, 1.0], // Smooth transitions for dark theme
         ),
       ),
       child: child,

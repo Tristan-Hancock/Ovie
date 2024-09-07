@@ -13,6 +13,7 @@ import 'pages/important_intro/intro_screen.dart';
 import 'pages/useraccount/Authpage.dart';
 import 'pages/useraccount/profile.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'widgets/top_bar.dart'; // Import the TopBar
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -36,7 +37,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Ovie App',
+      title: 'Ovelia',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -82,25 +83,11 @@ class _MainScreenState extends State<MainScreen> {
       _selectedIndex = index;
     });
   }
-@override
-  void initState() {
-    super.initState();
-    FirebaseMessaging.instance.getInitialMessage();
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Got a message whilst in the foreground!');
-      print('Message data: ${message.data}');
 
-      if (message.notification != null) {
-        print('Message also contained a notification: ${message.notification}');
-      }
-    });
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('Message clicked!');
-    });
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: TopBar(title: 'Ovelia'), // Add the TopBar here
       body: BackgroundGradient(
         child: _widgetOptions.elementAt(_selectedIndex),
       ),

@@ -50,21 +50,21 @@ class IntroScreen extends StatelessWidget {
     },
     child: Text(
       'Get started',
-      style: TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w500,
-        color: Colors.white,
+      style: GoogleFonts.bonaNova(
+        fontSize: 26, // might need to change later
+        fontWeight: FontWeight.w800,
+        color: Color.fromARGB(255, 255, 255, 255),
       ),
     ),
     style: ElevatedButton.styleFrom(
-      backgroundColor: Color.fromARGB(255, 246, 138, 206), // Adjusted to match the image change to FECCEA later
-      foregroundColor: Colors.white,
+      backgroundColor: Color.fromARGB(255, 3, 1, 3), // Confirm from UI designer later
+    foregroundColor: Color(0xFFFEFEFA), // Softer white for text
       padding: EdgeInsets.symmetric(vertical: 12),
-      minimumSize: Size(double.infinity, 78), // Set a fixed height
+      minimumSize: Size(double.infinity, 60), // Set a fixed height
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8), // Less rounded corners
       ),
-      elevation: 0, // Remove shadow
+      elevation: 4, // Remove shadow
     ),
   ),
 ),
