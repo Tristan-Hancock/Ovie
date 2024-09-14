@@ -187,7 +187,7 @@ class CommunityPostsOverlay extends StatelessWidget {
                                         _buildIconText(
                                           icon: Icons.thumb_up_alt_rounded,
                                           text: postData['upvotes']?.toString() ?? '0',
-                                          color: Colors.pinkAccent,
+                                          color: Color(0xFFADA8BE),
                                           onTap: () {
                                             // Implement upvote functionality
                                           },
@@ -198,7 +198,7 @@ class CommunityPostsOverlay extends StatelessWidget {
                                           text: (postData['comments'] != null && postData['comments'].isNotEmpty)
                                               ? postData['comments'].length.toString()
                                               : '0',
-                                          color: Colors.pinkAccent,
+                                          color: Color(0xFFADA8BE),
                                           onTap: () {
                                             showModalBottomSheet(
                                               context: context,

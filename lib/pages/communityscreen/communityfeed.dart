@@ -175,66 +175,22 @@ Widget _buildMainContent() {
               backgroundColor: Color(0xFF010101), // Black background
               elevation: 0,
               automaticallyImplyLeading: false,
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                IconButton(
-  padding: EdgeInsets.only(left: 0), // No padding on the left to push it to the edge
-  icon: Icon(Icons.menu, color: Colors.white),
-  onPressed: _toggleDrawer,
-),
-
-                  Spacer(),
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () => _selectTab(true), // Set the state to show posts
-                        child: Text(
-                          'Posts',
-                          style: TextStyle(
-                            color: _isPostsSelected ? Color(0xFFF46AA0) : Colors.white, // Pink for selected, white for unselected
-                            fontWeight: _isPostsSelected ? FontWeight.bold : FontWeight.normal,
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 20),
-                      GestureDetector(
-                        onTap: () => _selectTab(false), // Set the state to show saved
-                        child: Text(
-                          'Saved',
-                          style: TextStyle(
-                            color: !_isPostsSelected ? Color(0xFFF46AA0) : Colors.white, // Pink for selected, white for unselected
-                            fontWeight: !_isPostsSelected ? FontWeight.bold : FontWeight.normal,
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 20),
-                      IconButton(
-                        icon: Icon(Icons.refresh, color: Colors.white), // White icon color
-                        onPressed: _refreshPosts,
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.message, color: Colors.white), // Changed from send to message icon
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => ChatScreen()),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+              leading: IconButton(
+                padding: EdgeInsets.only(left: 0), // No padding on the left to push it to the edge
+                icon: Icon(Icons.menu, color: Colors.white),
+                onPressed: _toggleDrawer,
+              ), // Move the hamburger to the left (leading position)
+              title: _buildTabs(), // Place the tabs here instead of Row
             ),
-            body: _isPostsSelected ? _buildPostsContent() : _buildSavedContent(), // Change content based on selected tab
-        
+            body: _isPostsSelected ? _buildPostsContent() : _buildSavedContent(), // Use body inside Scaffold, not AppBar
           ),
         ),
       );
     },
   );
 }
+
+
 
 Widget _buildPostsContent() {
   return FutureBuilder<QuerySnapshot>(
@@ -270,88 +226,113 @@ Widget _buildPostsContent() {
 
               Map<String, dynamic> userData = userSnapshot.data!.data() as Map<String, dynamic>;
               String username = userData['username'] ?? 'Anonymous';
+return Padding(
+  padding: EdgeInsets.symmetric(vertical: 4.0), // Minimal space between posts
+  child: Container(
+    padding: EdgeInsets.zero,
+    decoration: BoxDecoration(
+      color: Color(0xFF1C1C1C), // Darker color for post background
+      borderRadius: BorderRadius.circular(8), // Slightly rounded corners
+      border: Border.all(color: Colors.grey.shade700, width: 1),
+    ),
+    child: ListTile(
+      tileColor: Colors.transparent,
+      contentPadding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0), // Consistent padding within the post
+      title: Row(
+        children: [
+          CircleAvatar(
+            radius: 20, // Avatar size
+            backgroundColor: Color.fromARGB(255, 124, 90, 236), // Avatar background color
+            child: Text(username[0]), // Display first letter of username
+          ),
+          SizedBox(width: 10),
+          Text(
+            username,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          Spacer(),
+          IconButton(
+            icon: Icon(Icons.more_vert, color: Colors.white),
+            onPressed: () {
+              // Open post options menu
+            },
+          ),
+        ],
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            data['content'],
+            style: TextStyle(color: Colors.grey[300]),
+          ),
+          SizedBox(height: 8), // Slightly reduced spacing
+          Row(
+            children: [
+              _buildTag('Cramps'), // Example tag, can be dynamic
+              SizedBox(width: 5),
+              _buildTag('PCOS'), // Another example tag
+            ],
+          ),
+          SizedBox(height: 8), // Space before icons
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  _buildIconText(
+                    icon: Icons.arrow_upward_rounded,
+                    text: data['upvotes'].toString(),
+                    color: Color.fromARGB(255, 124, 90, 236),
+                    onTap: () {
+                      // Implement upvote functionality
+                    },
+                  ),
+                  SizedBox(width: 20),
+                  _buildIconText(
+                    icon: Icons.bookmark,
+                    text: '',
+                    color: Color.fromARGB(255, 124, 90, 236),
+                    onTap: () {
+                      // Implement downvote functionality
+                      print ('saved clicked');
+                    },
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  _buildIconText(
+                    icon: Icons.comment,
+                    text: data['comments'].isNotEmpty ? data['comments'].length.toString() : '0',
+                    color: Color.fromARGB(255, 124, 90, 236),
+                    onTap: () {
+                      _showComments(doc.id); // Call the _showComments function with the post ID
+                    },
+                  ),
+                  SizedBox(width: 20),
+                  _buildIconText(
+                    icon: Icons.share,
+                    text: '',
+                    color: Color.fromARGB(255, 124, 90, 236),
+                    onTap: () {
+                      print('share button clicked');
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      isThreeLine: true,
+    ),
+  ),
+);
 
-              return Padding(
-                padding: EdgeInsets.symmetric(vertical: 4.0), // Minimal space between posts
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Color(0xFF1C1C1C), // Darker color for post background
-                    borderRadius: BorderRadius.circular(8), // Slightly rounded corners
-                    border: Border.all(color: Colors.grey.shade700, width: 1),
-                  ),
-                  child: ListTile(
-                    tileColor: Colors.transparent,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0), // Consistent padding within the post
-                    title: Text(
-                      username,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 5),
-                        Text(
-                          data['content'],
-                          style: TextStyle(color: Colors.grey[300]),
-                        ),
-                        SizedBox(height: 8), // Slightly reduced spacing
-                        // New icon row similar to Reddit's layout
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                _buildIconText(
-                                  icon: Icons.arrow_upward_rounded,
-                                  text: data['upvotes'].toString(),
-                                  color: Colors.pinkAccent,
-                                  onTap: () {
-                                    // Implement upvote functionality
-                                  },
-                                ),
-                                SizedBox(width: 20),
-                                _buildIconText(
-                                  icon: Icons.arrow_downward_rounded,
-                                  text: '',
-                                  color: Colors.pinkAccent,
-                                  onTap: () {
-                                    // Implement downvote functionality
-                                  },
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                _buildIconText(
-                                  icon: Icons.comment,
-                                  text: data['comments'].isNotEmpty ? data['comments'].length.toString() : '0',
-                                  color: Colors.pinkAccent,
-                                  onTap: () {
-                                    _showComments(doc.id); // Call the _showComments function with the post ID
-                                  },
-                                ),
-                                SizedBox(width: 20),
-                                _buildIconText(
-                                  icon: Icons.share,
-                                  text: '',
-                                  color: Colors.pinkAccent,
-                                  onTap: () {
-                                    print('share button clicked');
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    isThreeLine: true,
-                  ),
-                ),
-              );
             },
           );
         }).toList(),
@@ -390,4 +371,60 @@ Widget _buildIconText({
     _animationController.dispose();
     super.dispose();
   }
+  Widget _buildTabs() {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      GestureDetector(
+        onTap: () => _selectTab(true), // Select Posts tab
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          decoration: BoxDecoration(
+            color: _isPostsSelected ? Color.fromARGB(255, 124, 90, 236) : Colors.transparent, // Light purple for selected
+            borderRadius: BorderRadius.circular(30), // Rounded corners for the selected tab
+          ),
+          child: Text(
+            'Posts',
+            style: TextStyle(
+              color: _isPostsSelected ? Colors.white : Colors.grey, // White for selected, grey for unselected
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+      SizedBox(width: 10),
+      GestureDetector(
+        onTap: () => _selectTab(false), // Select Saved tab
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          decoration: BoxDecoration(
+            color: !_isPostsSelected ? Color.fromARGB(255, 124, 90, 236) : Colors.transparent, // Light purple for selected
+            borderRadius: BorderRadius.circular(30), // Rounded corners for the selected tab
+          ),
+          child: Text(
+            'Saved',
+            style: TextStyle(
+              color: !_isPostsSelected ? Colors.white : Colors.grey, // White for selected, grey for unselected
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
+}
+Widget _buildTag(String tagName) {
+  return Container(
+    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+    decoration: BoxDecoration(
+      color: Color.fromARGB(255, 124, 90, 236), // Background for tag
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Text(
+      tagName,
+      style: TextStyle(color: Colors.white, fontSize: 12),
+    ),
+  );
+}
+
 }
