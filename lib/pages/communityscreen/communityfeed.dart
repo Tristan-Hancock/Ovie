@@ -20,6 +20,7 @@ class _CommunityPageState extends State<CommunityPage> with SingleTickerProvider
   bool _isPostsSelected = true;
   late Future<QuerySnapshot> _postsFuture;
   String? _selectedCommunityId;
+  bool _isChatsSelected = false; // New state for Chats
 
   @override
   void initState() {
@@ -49,9 +50,11 @@ class _CommunityPageState extends State<CommunityPage> with SingleTickerProvider
     });
   }
 
-  void _selectTab(bool isPosts) {
+  void _selectTab(bool isPosts, bool isChats) {
     setState(() {
       _isPostsSelected = isPosts;
+      _isChatsSelected = isChats;
+
     });
   }
 
@@ -162,33 +165,44 @@ void _showComments(String postId) {
     );
   }
 
-Widget _buildMainContent() {
-  return AnimatedBuilder(
-    animation: _animationController,
-    builder: (context, child) {
-      return Transform.translate(
-        offset: Offset(250 * _animationController.value, 0),
-        child: BackgroundGradient(
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            appBar: AppBar(
-              backgroundColor: Color(0xFF010101), // Black background
-              elevation: 0,
-              automaticallyImplyLeading: false,
-              leading: IconButton(
-                padding: EdgeInsets.only(left: 0), // No padding on the left to push it to the edge
-                icon: Icon(Icons.menu, color: Colors.white),
-                onPressed: _toggleDrawer,
-              ), // Move the hamburger to the left (leading position)
-              title: _buildTabs(), // Place the tabs here instead of Row
+ Widget _buildMainContent() {
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(250 * _animationController.value, 0),
+          child: BackgroundGradient(
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              appBar: AppBar(
+                backgroundColor: Color(0xFF010101), // Black background
+                elevation: 0,
+                automaticallyImplyLeading: false,
+                leading: IconButton(
+                  icon: Icon(Icons.menu, color: Colors.white),
+                  onPressed: _toggleDrawer,
+                ),
+                title: _buildTabs(),
+                actions: [
+                  IconButton(
+                    icon: Icon(Icons.message, color: Colors.white),
+                    onPressed: () => _selectTab(false, true), // When chat icon is pressed, display chat
+                  ),
+                ],
+              ),
+              // Display the correct content based on the selected tab
+              body: _isChatsSelected
+                  ? ChatScreen() // If the chat is selected, show the ChatScreen
+                  : _isPostsSelected
+                      ? _buildPostsContent() // Show posts if selected
+                      : _buildSavedContent(), // Otherwise show saved content
             ),
-            body: _isPostsSelected ? _buildPostsContent() : _buildSavedContent(), // Use body inside Scaffold, not AppBar
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
+
 
 
 
@@ -372,47 +386,47 @@ Widget _buildIconText({
     super.dispose();
   }
   Widget _buildTabs() {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      GestureDetector(
-        onTap: () => _selectTab(true), // Select Posts tab
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          decoration: BoxDecoration(
-            color: _isPostsSelected ? Color.fromARGB(255, 124, 90, 236) : Colors.transparent, // Light purple for selected
-            borderRadius: BorderRadius.circular(30), // Rounded corners for the selected tab
-          ),
-          child: Text(
-            'Posts',
-            style: TextStyle(
-              color: _isPostsSelected ? Colors.white : Colors.grey, // White for selected, grey for unselected
-              fontWeight: FontWeight.bold,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        GestureDetector(
+          onTap: () => _selectTab(true, false), // Set to Posts view
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            decoration: BoxDecoration(
+              color: _isPostsSelected ? Color.fromARGB(255, 124, 90, 236) : Colors.transparent,
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Text(
+              'Posts',
+              style: TextStyle(
+                color: _isPostsSelected ? Colors.white : Colors.grey,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
-      ),
-      SizedBox(width: 10),
-      GestureDetector(
-        onTap: () => _selectTab(false), // Select Saved tab
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          decoration: BoxDecoration(
-            color: !_isPostsSelected ? Color.fromARGB(255, 124, 90, 236) : Colors.transparent, // Light purple for selected
-            borderRadius: BorderRadius.circular(30), // Rounded corners for the selected tab
-          ),
-          child: Text(
-            'Saved',
-            style: TextStyle(
-              color: !_isPostsSelected ? Colors.white : Colors.grey, // White for selected, grey for unselected
-              fontWeight: FontWeight.bold,
+        SizedBox(width: 10),
+        GestureDetector(
+          onTap: () => _selectTab(false, false), // Set to Saved view
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            decoration: BoxDecoration(
+              color: !_isPostsSelected && !_isChatsSelected ? Color.fromARGB(255, 124, 90, 236) : Colors.transparent,
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Text(
+              'Saved',
+              style: TextStyle(
+                color: !_isPostsSelected && !_isChatsSelected ? Colors.white : Colors.grey,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
-      ),
-    ],
-  );
-}
+      ],
+    );
+  }
 Widget _buildTag(String tagName) {
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),

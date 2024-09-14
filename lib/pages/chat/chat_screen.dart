@@ -19,34 +19,11 @@ class _ChatScreenState extends State<ChatScreen> {
       body: BackgroundGradient(
         child: Column(
           children: [
-            AppBar(
-              title: Text('Chats'),
-              backgroundColor: Color.fromARGB(255, 252, 208, 208),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search users...',
-                  prefixIcon: Icon(Icons.search),
-                ),
-                onChanged: (query) {
-                  setState(() {
-                    _searchQuery = query.trim();
-                  });
-                },
-              ),
-            ),
+            SizedBox(height: 40), // For some spacing at the top
+            _buildSearchBar(), // Search bar at the top
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: _searchQuery.isEmpty
-                    ? FirebaseFirestore.instance.collection('users').snapshots()
-                    : FirebaseFirestore.instance
-                        .collection('users')
-                        .where('username', isGreaterThanOrEqualTo: _searchQuery)
-                        .where('username', isLessThanOrEqualTo: '$_searchQuery\uf8ff')
-                        .snapshots(),
+                stream: _getUsersStream(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
@@ -54,17 +31,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                     return Center(child: Text('No users found.'));
                   }
-                  return ListView(
-                    children: snapshot.data!.docs.map((doc) {
-                      var userData = doc.data() as Map<String, dynamic>;
-                      return ListTile(
-                        title: Text(userData['username'] ?? 'Unknown'),
-                        onTap: () {
-                          _startChat(context, doc.id, userData['username']);
-                        },
-                      );
-                    }).toList(),
-                  );
+                  return _buildChatList(snapshot.data!.docs);
                 },
               ),
             ),
@@ -74,6 +41,84 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  // Search bar widget
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          hintText: 'Search',
+          prefixIcon: Icon(Icons.search),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(25),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: Colors.white.withOpacity(0.2),
+        ),
+        onChanged: (query) {
+          setState(() {
+            _searchQuery = query.trim();
+          });
+        },
+      ),
+    );
+  }
+
+  // Fetch users based on the search query
+  Stream<QuerySnapshot> _getUsersStream() {
+    return _searchQuery.isEmpty
+        ? FirebaseFirestore.instance.collection('users').snapshots()
+        : FirebaseFirestore.instance
+            .collection('users')
+            .where('username', isGreaterThanOrEqualTo: _searchQuery)
+            .where('username', isLessThanOrEqualTo: '$_searchQuery\uf8ff')
+            .snapshots();
+  }
+
+  // Build chat list with avatars, usernames, and last message
+  Widget _buildChatList(List<DocumentSnapshot> docs) {
+    return ListView.builder(
+      itemCount: docs.length,
+      itemBuilder: (context, index) {
+        var userData = docs[index].data() as Map<String, dynamic>;
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundImage: NetworkImage(userData['avatarUrl'] ?? 'https://via.placeholder.com/150'),
+              radius: 25,
+            ),
+            title: Text(
+              userData['username'] ?? 'Unknown',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text(
+              userData['lastMessage'] ?? 'No messages yet',
+              style: TextStyle(color: Colors.grey),
+            ),
+            trailing: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '9:36 PM', // Placeholder time for now, update with real data
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+                Icon(Icons.more_vert, color: Colors.white),
+              ],
+            ),
+            onTap: () {
+              _startChat(context, docs[index].id, userData['username']);
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  // Start chat logic (unchanged)
   void _startChat(BuildContext context, String userId, String username) async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) return;
@@ -91,6 +136,7 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  // Fetch or create chat logic (unchanged)
   Future<String> _getOrCreateChatId(String userId1, String userId2) async {
     String chatId;
     var chats = await FirebaseFirestore.instance
