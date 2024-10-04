@@ -9,16 +9,15 @@ class CommunityMenu extends StatefulWidget {
   final bool isDrawerOpen;
   final String selectedCommunity;
   final Function(String) onCommunitySelected;
-  final Function(String) onCommunitySelectedForOverlay; // Add this line
+  final Function(String) onCommunitySelectedForOverlay;
 
-CommunityMenu({
-  required this.animationController,
-  required this.isDrawerOpen,
-  required this.selectedCommunity,
-  required this.onCommunitySelected,
-  required this.onCommunitySelectedForOverlay,
-});
-
+  CommunityMenu({
+    required this.animationController,
+    required this.isDrawerOpen,
+    required this.selectedCommunity,
+    required this.onCommunitySelected,
+    required this.onCommunitySelectedForOverlay,
+  });
 
   @override
   _CommunityMenuState createState() => _CommunityMenuState();
@@ -35,50 +34,62 @@ class _CommunityMenuState extends State<CommunityMenu> {
       builder: (context, child) {
         return Transform.translate(
           offset: Offset(-250 * (1 - widget.animationController.value), 0),
-          child: BackgroundGradient(
+          child: BackgroundGradient( // Keep the background as is
             child: Container(
               width: 250,
               child: SafeArea(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Wrap the "Your Communities" and "All Communities" in a light blue background
                     Container(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            _isYourCommunities ? 'Your Communities' : 'All Communities',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: const Color.fromARGB(255, 0, 0, 0),
-                            ),
-                          ),
-                          IconButton(
-                            icon: Icon(
-                              _isYourCommunities ? Icons.group : Icons.public,
-                              color: const Color.fromARGB(255, 0, 0, 0),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _isYourCommunities = !_isYourCommunities;
-                              });
-                            },
-                          ),
-                        ],
+  color: Color(0xFFBBBFFE), // Light blue background
+  padding: const EdgeInsets.all(16.0),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Expanded(
+        child: Text(
+          _isYourCommunities ? 'Your Communities' : 'All Communities',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+          ),
+          overflow: TextOverflow.ellipsis, // Prevents overflow by truncating text
+        ),
+      ),
+      IconButton(
+        icon: Icon(
+          _isYourCommunities ? Icons.group : Icons.public,
+          color: Colors.black,
+        ),
+        onPressed: () {
+          setState(() {
+            _isYourCommunities = !_isYourCommunities;
+          });
+        },
+      ),
+    ],
+  ),
+),
+
+                    // Create a Community Button Section with new background color
+                    Container(
+                      color: Color(0xFF101631), // Use the main background color
+                      child: ListTile(
+                        leading: Icon(Icons.add, color: Color(0xFFF4608B)),
+                        title: Text(
+                          'Create a community',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                        ),
+                        onTap: () {
+                          _showCreateCommunityDialog(context);
+                        },
                       ),
                     ),
-                    ListTile(
-                      leading: Icon(Icons.add, color: const Color.fromARGB(255, 0, 0, 0)),
-                      title: Text(
-                        'Create a community',
-                        style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
-                      ),
-                      onTap: () {
-                        _showCreateCommunityDialog(context);
-                      },
-                    ),
+                    Divider(height: 1, color: Colors.grey[300]), // Light divider between sections
+                    // List of Communities Wrapped in main background color
                     Expanded(
                       child: FutureBuilder<QuerySnapshot>(
                         future: _isYourCommunities
@@ -112,40 +123,46 @@ class _CommunityMenuState extends State<CommunityMenu> {
     );
   }
 
-Widget _buildCommunityItem(BuildContext context, DocumentSnapshot community) {
-  String communityName = community['name'];
-  return FutureBuilder<bool>(
-    future: _authService.isCommunityJoined(community.id),
-    builder: (context, snapshot) {
-      bool isJoined = snapshot.data ?? false;
-      return ListTile(
-        title: Text(
-          communityName,
-          style: TextStyle(color: Colors.black),
-        ),
-        trailing: IconButton(
-          icon: Icon(
-            isJoined ? Icons.star : Icons.star_border,
-            color: Colors.black,
+  Widget _buildCommunityItem(BuildContext context, DocumentSnapshot community) {
+    String communityName = community['name'];
+    return FutureBuilder<bool>(
+      future: _authService.isCommunityJoined(community.id),
+      builder: (context, snapshot) {
+        bool isJoined = snapshot.data ?? false;
+        return Container(
+          margin: EdgeInsets.only(bottom: 10.0), // Add spacing between items
+          color: Color(0xFF101631), // Main background color for each community item
+          child: ListTile(
+            title: Text(
+              communityName,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+                fontSize: 16,
+              ),
+            ),
+            trailing: IconButton(
+              icon: Icon(
+                isJoined ? Icons.star : Icons.star_border,
+                color: isJoined ? Color(0xFFF4608B) : Colors.white,
+              ),
+              onPressed: () async {
+                if (isJoined) {
+                  await _authService.leaveCommunity(community.id);
+                } else {
+                  await _authService.joinCommunity(community.id);
+                }
+                setState(() {}); // Refresh the community list after join/leave action
+              },
+            ),
+            onTap: () {
+              widget.onCommunitySelectedForOverlay(community.id);
+            },
           ),
-          onPressed: () async {
-            if (isJoined) {
-              await _authService.leaveCommunity(community.id);
-            } else {
-              await _authService.joinCommunity(community.id);
-            }
-            (context as Element).markNeedsBuild(); // Refresh UI
-          },
-        ),
-        onTap: () {
-          widget.onCommunitySelectedForOverlay(community.id); // Use this line
-        },
-      );
-    },
-  );
-}
-
-
+        );
+      },
+    );
+  }
 
   void _showCreateCommunityDialog(BuildContext context) {
     TextEditingController _communityController = TextEditingController();
@@ -160,11 +177,18 @@ Widget _buildCommunityItem(BuildContext context, DocumentSnapshot community) {
             children: [
               TextField(
                 controller: _communityController,
-                decoration: InputDecoration(hintText: 'Community name'),
+                decoration: InputDecoration(
+                  hintText: 'Community name',
+                  hintStyle: TextStyle(color: Colors.grey),
+                ),
               ),
+              SizedBox(height: 10),
               TextField(
                 controller: _descriptionController,
-                decoration: InputDecoration(hintText: 'Description'),
+                decoration: InputDecoration(
+                  hintText: 'Description',
+                  hintStyle: TextStyle(color: Colors.grey),
+                ),
               ),
             ],
           ),
@@ -173,7 +197,7 @@ Widget _buildCommunityItem(BuildContext context, DocumentSnapshot community) {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: Text('Cancel', style: TextStyle(color: Colors.black)),
             ),
             TextButton(
               onPressed: () async {
@@ -188,10 +212,10 @@ Widget _buildCommunityItem(BuildContext context, DocumentSnapshot community) {
                     'followers': [],
                   });
                   Navigator.of(context).pop();
-                  setState(() {}); // Refresh the community list
+                  setState(() {}); // Refresh the community list after creation
                 }
               },
-              child: Text('Create'),
+              child: Text('Create', style: TextStyle(color: Color(0xFFF4608B))), // Pink create button
             ),
           ],
         );
