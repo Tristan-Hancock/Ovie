@@ -87,53 +87,168 @@ void _showComments(String postId) {
   );
 }
 
-  void _showAddPostDialog() {
-    TextEditingController _postController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Write post here'),
-          content: TextField(
-            controller: _postController,
-            maxLength: 600,
-            maxLines: 5,
-            decoration: InputDecoration(hintText: 'Write post here'),
+void _showAddPostDialog() {
+  TextEditingController _titleController = TextEditingController();
+  TextEditingController _bodyController = TextEditingController();
+  TextEditingController _tagsController = TextEditingController();
+
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,  // Allows the bottom sheet to take up more space
+    backgroundColor: Colors.transparent,  // Transparent background to match design
+    builder: (BuildContext context) {
+      return Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom, // Adjust for keyboard
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white, // Background color as per Figma
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20.0),
+              topRight: Radius.circular(20.0),
+            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancel'),
+          padding: EdgeInsets.all(16.0),  // Padding inside the bottom sheet
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,  // Minimize the height based on content
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title Row with My Post Text and Search Icon
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'My Post',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.search, color: Colors.black),
+                      onPressed: () {
+                        // Implement search if necessary
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+
+                // Title Field
+                TextField(
+                  controller: _titleController,
+                  decoration: InputDecoration(
+                    labelText: 'Title',
+                    labelStyle: TextStyle(color: Colors.black54),
+                    hintText: 'Type here',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16),
+
+                // Body Field
+                TextField(
+                  controller: _bodyController,
+                  maxLines: 5,
+                  decoration: InputDecoration(
+                    labelText: 'Body',
+                    labelStyle: TextStyle(color: Colors.black54),
+                    hintText: 'Type here',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16),
+
+                // Tags Field
+                TextField(
+                  controller: _tagsController,
+                  decoration: InputDecoration(
+                    labelText: 'Tags',
+                    labelStyle: TextStyle(color: Colors.black54),
+                    hintText: 'Type here',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16),
+
+                // Post and Delete Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // Post Button
+                    ElevatedButton(
+                      onPressed: () async {
+                        User? user = FirebaseAuth.instance.currentUser;
+                        if (user != null) {
+                          var postData = {
+                            'title': _titleController.text,
+                            'content': _bodyController.text,
+                            'tags': _tagsController.text.split(','),
+                            'timestamp': FieldValue.serverTimestamp(),
+                            'upvotes': 0,
+                            'comments': [],
+                            'replies': [],
+                            'saved': false,
+                            'userId': user.uid,
+                            'username': user.displayName ?? 'Anonymous',
+                          };
+                          print("Adding post data: $postData");
+                          await FirebaseFirestore.instance.collection('posts').add(postData);
+                          Navigator.of(context).pop();
+                          _refreshPosts();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFFF4608B),  // Pink color from Figma
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                      ),
+                      child: Text(
+                        'Post',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+
+                    // Delete Button
+                    OutlinedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();  // Close bottom sheet on delete
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: Color(0xFFF4608B)),  // Pink border
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                      ),
+                      child: Text(
+                        'Delete',
+                        style: TextStyle(color: Color(0xFFF4608B)),  // Pink text for delete
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () async {
-                User? user = FirebaseAuth.instance.currentUser;
-                if (user != null) {
-                  var postData = {
-                    'content': _postController.text,
-                    'timestamp': FieldValue.serverTimestamp(),
-                    'upvotes': 0,
-                    'comments': [],
-                    'replies': [],
-                    'saved': false,
-                    'userId': user.uid,
-                    'username': user.displayName ?? 'Anonymous',
-                  };
-                  print("Adding post data: $postData"); // Print statement
-                  await FirebaseFirestore.instance.collection('posts').add(postData);
-                  Navigator.of(context).pop();
-                  _refreshPosts();
-                }
-              },
-              child: Text('Post'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+          ),
+        ),
+      );
+    },
+  );
+}
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -165,43 +280,129 @@ void _showComments(String postId) {
     );
   }
 
- Widget _buildMainContent() {
-    return AnimatedBuilder(
-      animation: _animationController,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(250 * _animationController.value, 0),
-          child: BackgroundGradient(
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
-              appBar: AppBar(
-                backgroundColor: Color(0xFF010101), // Black background
-                elevation: 0,
-                automaticallyImplyLeading: false,
-                leading: IconButton(
-                  icon: Icon(Icons.menu, color: Colors.white),
-                  onPressed: _toggleDrawer,
+Widget _buildMainContent() {
+  return AnimatedBuilder(
+    animation: _animationController,
+    builder: (context, child) {
+      return Transform.translate(
+        offset: Offset(250 * _animationController.value, 0),
+        child: BackgroundGradient(
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            appBar: PreferredSize(
+              preferredSize: Size.fromHeight(110), // Adjust height to accommodate tabs
+              child: SafeArea(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Top Row: Drawer, "Community" text, and Search Icon
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Drawer Icon
+                          IconButton(
+                            icon: Icon(Icons.menu, color: Colors.white),
+                            onPressed: _toggleDrawer, // Toggle drawer
+                          ),
+                          // Community Text
+                          Text(
+                            'Community',
+                            style: TextStyle(
+                              fontFamily: 'Quicksand',
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                            ),
+                          ),
+                          // Search Icon
+                          IconButton(
+                            icon: Icon(Icons.search, color: Colors.white),
+                            onPressed: () {
+                              // Implement search functionality here
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 10), // Spacing between the title and tabs
+
+                    // Posts and Chats Toggle Tabs
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GestureDetector(
+                            onTap: () => _selectTab(true, false), // When 'Posts' is selected
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: _isPostsSelected ? Color(0xFFBBBFFE) : Colors.transparent, // Highlight Posts when selected
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              child: Text(
+                                'Posts',
+                                style: TextStyle(
+                                  color: _isPostsSelected ? Colors.white : Colors.grey,
+                                  fontWeight: _isPostsSelected ? FontWeight.bold : FontWeight.normal,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () => _selectTab(false, true), // When 'Chats' is selected
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: _isChatsSelected ? Color(0xFF7C5AEC) : Colors.transparent, // Highlight Chats when selected
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              child: Text(
+                                'Chats',
+                                style: TextStyle(
+                                  color: _isChatsSelected ? Colors.white : Colors.grey,
+                                  fontWeight: _isChatsSelected ? FontWeight.bold : FontWeight.normal,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                title: _buildTabs(),
-                actions: [
-                  IconButton(
-                    icon: Icon(Icons.message, color: Colors.white),
-                    onPressed: () => _selectTab(false, true), // When chat icon is pressed, display chat
-                  ),
-                ],
               ),
-              // Display the correct content based on the selected tab
-              body: _isChatsSelected
-                  ? ChatScreen() // If the chat is selected, show the ChatScreen
-                  : _isPostsSelected
-                      ? _buildPostsContent() // Show posts if selected
-                      : _buildSavedContent(), // Otherwise show saved content
             ),
+            body: _isChatsSelected
+                ? ChatScreen() // Show ChatScreen if Chats is selected
+                : _isPostsSelected
+                    ? _buildPostsContent() // Show Posts if selected
+                    : _buildSavedContent(), // Show Saved content otherwise
+
+            // Floating Action Button (Create Post Button)
+            floatingActionButton: FloatingActionButton(
+              onPressed: _showAddPostDialog,  // Use the function already written
+              backgroundColor: Color(0xFFF4608B),  // Use the pink color from the Figma
+              child: Icon(
+                Icons.add,  // Plus icon for creating a new post
+                color: Colors.white,
+                size: 30,  // Match the Figma size (adjust if needed)
+              ),
+            ),
+            floatingActionButtonLocation: FloatingActionButtonLocation.endFloat, // Positioned at the bottom-right
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
+
+
+
 
 
 
@@ -214,10 +415,20 @@ Widget _buildPostsContent() {
         return Center(child: CircularProgressIndicator());
       }
       if (snapshot.hasError) {
-        return Center(child: Text('Error: ${snapshot.error}', style: TextStyle(color: Colors.white)));
+        return Center(
+          child: Text(
+            'Error: ${snapshot.error}',
+            style: TextStyle(color: Colors.black), // Updated text color for error message
+          ),
+        );
       }
       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-        return Center(child: Text('No posts available.', style: TextStyle(color: Colors.white)));
+        return Center(
+          child: Text(
+            'No posts available.',
+            style: TextStyle(color: Colors.black), // Updated text color for no posts message
+          ),
+        );
       }
 
       return ListView(
@@ -232,121 +443,148 @@ Widget _buildPostsContent() {
                 return Center(child: CircularProgressIndicator());
               }
               if (userSnapshot.hasError) {
-                return Center(child: Text('Error: ${userSnapshot.error}', style: TextStyle(color: Colors.white)));
+                return Center(
+                  child: Text(
+                    'Error: ${userSnapshot.error}',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                );
               }
               if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
-                return Center(child: Text('User not found', style: TextStyle(color: Colors.white)));
+                return Center(
+                  child: Text(
+                    'User not found',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                );
               }
 
               Map<String, dynamic> userData = userSnapshot.data!.data() as Map<String, dynamic>;
               String username = userData['username'] ?? 'Anonymous';
-return Padding(
-  padding: EdgeInsets.symmetric(vertical: 4.0), // Minimal space between posts
-  child: Container(
-    padding: EdgeInsets.zero,
-    decoration: BoxDecoration(
-      color: Color(0xFF1C1C1C), // Darker color for post background
-      borderRadius: BorderRadius.circular(8), // Slightly rounded corners
-      border: Border.all(color: Colors.grey.shade700, width: 1),
-    ),
-    child: ListTile(
-      tileColor: Colors.transparent,
-      contentPadding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0), // Consistent padding within the post
-      title: Row(
-        children: [
-          CircleAvatar(
-            radius: 20, // Avatar size
-            backgroundColor: Color.fromARGB(255, 124, 90, 236), // Avatar background color
-            child: Text(username[0]), // Display first letter of username
-          ),
-          SizedBox(width: 10),
-          Text(
-            username,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          Spacer(),
-          IconButton(
-            icon: Icon(Icons.more_vert, color: Colors.white),
-            onPressed: () {
-              // Open post options menu
-            },
-          ),
-        ],
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            data['content'],
-            style: TextStyle(color: Colors.grey[300]),
-          ),
-          SizedBox(height: 8), // Slightly reduced spacing
-          Row(
-            children: [
-              _buildTag('Cramps'), // Example tag, can be dynamic
-              SizedBox(width: 5),
-              _buildTag('PCOS'), // Another example tag
-            ],
-          ),
-          SizedBox(height: 8), // Space before icons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  _buildIconText(
-                    icon: Icons.arrow_upward_rounded,
-                    text: data['upvotes'].toString(),
-                    color: Color.fromARGB(255, 124, 90, 236),
-                    onTap: () {
-                      // Implement upvote functionality
-                    },
-                  ),
-                  SizedBox(width: 20),
-                  _buildIconText(
-                    icon: Icons.bookmark,
-                    text: '',
-                    color: Color.fromARGB(255, 124, 90, 236),
-                    onTap: () {
-                      // Implement downvote functionality
-                      print ('saved clicked');
-                    },
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  _buildIconText(
-                    icon: Icons.comment,
-                    text: data['comments'].isNotEmpty ? data['comments'].length.toString() : '0',
-                    color: Color.fromARGB(255, 124, 90, 236),
-                    onTap: () {
-                      _showComments(doc.id); // Call the _showComments function with the post ID
-                    },
-                  ),
-                  SizedBox(width: 20),
-                  _buildIconText(
-                    icon: Icons.share,
-                    text: '',
-                    color: Color.fromARGB(255, 124, 90, 236),
-                    onTap: () {
-                      print('share button clicked');
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-      isThreeLine: true,
-    ),
-  ),
-);
 
+              return Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0), // Adjust spacing
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white, // Set post background to white
+                    borderRadius: BorderRadius.circular(12), // Slightly rounded corners
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 1,
+                        blurRadius: 5,
+                        offset: Offset(0, 2), // Adds subtle shadow for depth
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0), // Adjust padding for the post content
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            // Placeholder for Avatar Image
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor: Color(0xFFBBBFFE), // Background for avatar
+                              child: Text(username[0].toUpperCase()), // Display first letter of username
+                            ),
+                            SizedBox(width: 10),
+                            Text(
+                              username,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16, // Match Figma text size
+                                color: Colors.black,
+                              ),
+                            ),
+                            Spacer(),
+                            IconButton(
+                              icon: Icon(Icons.more_vert, color: Colors.grey),
+                              onPressed: () {
+                                // Open post options menu
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 8),
+                        // Post Title
+                        Text(
+                          data['title'] ?? 'Title goes here', // Placeholder title if none
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.black, // Match Figma color
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        // Post Content
+                        Text(
+                          data['content'] ?? 'Post content goes here...',
+                          style: TextStyle(
+                            color: Colors.black54, // Lighter color for post content
+                            fontSize: 14,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Row(
+                          children: [
+                            _buildTag('Cramps'), // Example tag
+                            SizedBox(width: 5),
+                            _buildTag('PCOS'), // Another example tag
+                          ],
+                        ),
+                        SizedBox(height: 8),
+                        // Post Interactions (Upvote, Bookmark, Comment, Share)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                _buildIconText(
+                                  iconPath: 'assets/icons/like.png', // Placeholder for upvote icon
+                                  text: data['upvotes'].toString(),
+                                  onTap: () {
+                                    // Implement upvote functionality
+                                  },
+                                ),
+                                SizedBox(width: 20),
+                                _buildIconText(
+                                  iconPath: 'assets/icons/save.png', // Placeholder for bookmark icon
+                                  text: '',
+                                  onTap: () {
+                                    // Implement bookmark functionality
+                                  },
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                _buildIconText(
+                                  iconPath: 'assets/icons/comments.png', // Placeholder for comment icon
+                                  text: data['comments'].isNotEmpty ? data['comments'].length.toString() : '0',
+                                  onTap: () {
+                                    _showComments(doc.id); // Call the _showComments function with the post ID
+                                  },
+                                ),
+                                // SizedBox(width: 20),
+                                // _buildIconText(
+                                //   iconPath: 'assets/icons/share.png', // Placeholder for share icon
+                                //   text: '',
+                                //   onTap: () {
+                                //     // Implement share functionality
+                                //   },
+                                // ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
             },
           );
         }).toList(),
@@ -355,27 +593,62 @@ return Padding(
   );
 }
 
+// Widget to handle Tag UI
+Widget _buildTag(String tagName) {
+  return Container(
+    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    decoration: BoxDecoration(
+      color: Color(0xFFBBBFFE), // Updated tag background color
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Text(
+      tagName,
+      style: TextStyle(color: Colors.white, fontSize: 12),
+    ),
+  );
+}
 
+// Widget to handle Icon and Text (like Upvote, Bookmark, Comment, etc.)
 Widget _buildIconText({
-  required IconData icon,
+  required String iconPath,
   required String text,
   required VoidCallback onTap,
-  required Color color,
 }) {
   return GestureDetector(
     onTap: onTap,
     child: Row(
       children: [
-        Icon(icon, color: color, size: 18), // Slightly smaller icon size
-        SizedBox(width: 3),
+        Image.asset(iconPath, height: 20), // Placeholder for custom icons
+        SizedBox(width: 4),
         Text(
           text,
-          style: TextStyle(color: color),
+          style: TextStyle(color: Colors.black),
         ),
       ],
     ),
   );
 }
+
+// Widget _buildIconText({
+//   required IconData icon,
+//   required String text,
+//   required VoidCallback onTap,
+//   required Color color,
+// }) {
+//   return GestureDetector(
+//     onTap: onTap,
+//     child: Row(
+//       children: [
+//         Icon(icon, color: color, size: 18), // Slightly smaller icon size
+//         SizedBox(width: 3),
+//         Text(
+//           text,
+//           style: TextStyle(color: color),
+//         ),
+//       ],
+//     ),
+//   );
+// }
   Widget _buildSavedContent() {
     return Center(child: Text('No Saves Added')); // Replace with actual saved content
   }
@@ -385,60 +658,70 @@ Widget _buildIconText({
     _animationController.dispose();
     super.dispose();
   }
-  Widget _buildTabs() {
-    return Row(
+
+
+
+  
+   Widget _buildTabs() {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8.0), // Adjust padding as needed
+    child: Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         GestureDetector(
-          onTap: () => _selectTab(true, false), // Set to Posts view
+          onTap: () => _selectTab(true, false), // When 'Posts' is selected
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
             decoration: BoxDecoration(
-              color: _isPostsSelected ? Color.fromARGB(255, 124, 90, 236) : Colors.transparent,
+              color: _isPostsSelected ? Color(0xFF7C5AEC) : Colors.transparent, // Selected background color
               borderRadius: BorderRadius.circular(30),
             ),
             child: Text(
               'Posts',
               style: TextStyle(
                 color: _isPostsSelected ? Colors.white : Colors.grey,
-                fontWeight: FontWeight.bold,
+                fontWeight: _isPostsSelected ? FontWeight.bold : FontWeight.normal,
+                fontSize: 16,
               ),
             ),
           ),
         ),
-        SizedBox(width: 10),
+        SizedBox(width: 10), // Space between tabs
         GestureDetector(
-          onTap: () => _selectTab(false, false), // Set to Saved view
+          onTap: () => _selectTab(false, true), // When 'Chats' is selected
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
             decoration: BoxDecoration(
-              color: !_isPostsSelected && !_isChatsSelected ? Color.fromARGB(255, 124, 90, 236) : Colors.transparent,
+              color: !_isPostsSelected ? Color(0xFF7C5AEC) : Colors.transparent, // Selected background color
               borderRadius: BorderRadius.circular(30),
             ),
             child: Text(
-              'Saved',
+              'Chats',
               style: TextStyle(
-                color: !_isPostsSelected && !_isChatsSelected ? Colors.white : Colors.grey,
-                fontWeight: FontWeight.bold,
+                color: !_isPostsSelected ? Colors.white : Colors.grey,
+                fontWeight: !_isPostsSelected ? FontWeight.bold : FontWeight.normal,
+                fontSize: 16,
               ),
             ),
           ),
         ),
       ],
-    );
-  }
-Widget _buildTag(String tagName) {
-  return Container(
-    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-    decoration: BoxDecoration(
-      color: Color.fromARGB(255, 124, 90, 236), // Background for tag
-      borderRadius: BorderRadius.circular(20),
-    ),
-    child: Text(
-      tagName,
-      style: TextStyle(color: Colors.white, fontSize: 12),
     ),
   );
 }
+
+// Widget _buildTag(String tagName) {
+//   return Container(
+//     padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+//     decoration: BoxDecoration(
+//       color: Color.fromARGB(255, 124, 90, 236), // Background for tag
+//       borderRadius: BorderRadius.circular(20),
+//     ),
+//     child: Text(
+//       tagName,
+//       style: TextStyle(color: Colors.white, fontSize: 12),
+//     ),
+//   );
+// }
 
 }
