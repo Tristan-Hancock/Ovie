@@ -69,6 +69,7 @@ class _DoctorContactState extends State<DoctorContact> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFF101631),
+        automaticallyImplyLeading: false, 
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
