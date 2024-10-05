@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:ovie/widgets/background_gradient.dart';
-import 'package:intl/intl.dart'; 
+import 'package:intl/intl.dart';
 
 class MessageBubble extends StatelessWidget {
   final String message;
@@ -13,7 +12,7 @@ class MessageBubble extends StatelessWidget {
 
   String _formatTimestamp(Timestamp timestamp) {
     DateTime dateTime = timestamp.toDate();
-    return DateFormat('MMM d, h:mm a').format(dateTime);
+    return DateFormat('h:mm a').format(dateTime);
   }
 
   @override
@@ -24,7 +23,7 @@ class MessageBubble extends StatelessWidget {
         margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
         padding: EdgeInsets.symmetric(vertical: 10, horizontal: 14),
         decoration: BoxDecoration(
-          color: isMe ? Color(0xFFFDD7E0) : Color(0xFFD2D3FA), // Pink for sent, purple for received
+          color: isMe ? Color(0xFFBBBFFE) : Color(0xFFFDD7E0), // Updated message colors
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
@@ -39,15 +38,16 @@ class MessageBubble extends StatelessWidget {
             Text(
               message,
               style: TextStyle(
-                color: isMe ? Colors.black : const Color.fromARGB(255, 0, 0, 0), // White for received text
+                color: Color(0xFF101631), // Blackish text color for both sent/received
               ),
             ),
             SizedBox(height: 4),
             Text(
               _formatTimestamp(timestamp),
               style: TextStyle(
-                color: isMe ? Colors.black54 : Colors.white70,
+                color: Color(0xFFA9A9A9), // Grey for timestamp
                 fontSize: 10,
+                fontStyle: FontStyle.italic,
               ),
             ),
           ],
@@ -103,77 +103,99 @@ class _PrivateChatScreenState extends State<PrivateChatScreen> {
     });
   }
 
- @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    backgroundColor: Color(0xFF181A20), // Solid dark background
-    body: Column(
-      children: [
-        AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white), // Changed color to white
-            onPressed: () => Navigator.pop(context),
-          ),
-          title: Text(
-            widget.peerUsername,
-            style: TextStyle(color: Color.fromARGB(255, 174, 174, 174)), // White text color
-          ),
-          backgroundColor: Color(0xFF252B33), // Darker background for app bar
-        ),
-        Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('chats')
-                .doc(widget.chatId)
-                .collection('messages')
-                .orderBy('timestamp', descending: true)
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              }
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return Center(child: Text('No messages.', style: TextStyle(color: Colors.white)));
-              }
-              return ListView(
-                reverse: true,
-                children: snapshot.data!.docs.map((doc) {
-                  var messageData = doc.data() as Map<String, dynamic>;
-                  bool isMe = messageData['senderId'] == FirebaseAuth.instance.currentUser!.uid;
-                  return MessageBubble(
-                    message: messageData['text'],
-                    isMe: isMe,
-                    timestamp: messageData['timestamp'],
-                  );
-                }).toList(),
-              );
-            },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _messageController,
-                  decoration: InputDecoration(
-                    hintText: 'Type a message...',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                ),
-              ),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color(0xFF101631), // Updated background color (dark blue)
+      body: Column(
+        children: [
+          AppBar(
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white), 
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: Text(
+              widget.peerUsername,
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Color(0xFF101631), // Dark blue AppBar
+            actions: [
               IconButton(
-                icon: Icon(Icons.send, color: Color(0xFF7C5AEC)),
-                onPressed: _sendMessage,
+                icon: Icon(Icons.more_vert, color: Colors.white), // Three dots menu
+                onPressed: () {
+                  // Add action logic here
+                },
               ),
             ],
           ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('chats')
+                  .doc(widget.chatId)
+                  .collection('messages')
+                  .orderBy('timestamp', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(child: Text('No messages.', style: TextStyle(color: Colors.white)));
+                }
+                return ListView(
+                  reverse: true,
+                  children: snapshot.data!.docs.map((doc) {
+                    var messageData = doc.data() as Map<String, dynamic>;
+                    bool isMe = messageData['senderId'] == FirebaseAuth.instance.currentUser!.uid;
+                    return MessageBubble(
+                      message: messageData['text'],
+                      isMe: isMe,
+                      timestamp: messageData['timestamp'],
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+          ),
+         Padding(
+  padding: MediaQuery.of(context).viewInsets, // Adjust for keyboard
+  child: Stack(
+    children: [
+      Container(
+        decoration: BoxDecoration(
+          color: Colors.white, // White background for the input
+          borderRadius: BorderRadius.circular(30),
         ),
-      ],
-    ),
-  );
-}
+        padding: EdgeInsets.only(right: 60), // Leave space for the send button
+        child: TextField(
+          controller: _messageController,
+          decoration: InputDecoration(
+            hintText: 'Type your message...',
+            hintStyle: TextStyle(color: Color(0xFFA9A9A9)), // Placeholder color
+            border: InputBorder.none,
+            contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          ),
+        ),
+      ),
+      Positioned(
+        right: 10, // Positioning the send button on the right inside the text field
+        top: 0,
+        bottom: 0,
+        child: GestureDetector(
+          onTap: _sendMessage,
+          child: Image.asset(
+            'assets/icons/send.png',
+            height: 24,
+          ),
+        ),
+      ),
+    ],
+  ),
+),
+
+        ],
+      ),
+    );
+  }
 }

@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:ovie/pages/chat/chat_screen.dart';
+import 'package:ovie/pages/doctors/DoctorContact.dart';
 import 'widgets/bottom_navigation.dart';
 import 'widgets/background_gradient.dart';
 import 'pages/home_page.dart';
@@ -37,14 +39,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Ovelia',
+      title: 'Ovelia', // Update this to your desired app title
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
- initialRoute: _initialRoute(),
+      initialRoute: _initialRoute(),
       routes: {
-        '/': (context) => AuthPage(), // Ensure the root route is defined
-  //need to fix this routing to stop showing the intro
+        '/': (context) => AuthPage(),
         '/intro': (context) => IntroScreen(),
         '/home': (context) => MainScreen(),
         '/calendar': (context) => CalendarPage(),
@@ -53,11 +54,11 @@ class MyApp extends StatelessWidget {
       },
     );
   }
-  String _initialRoute(){
-    if (isLoggedIn){
-      return showIntro ? '/intro' : '/home';
 
-    }else {
+  String _initialRoute() {
+    if (isLoggedIn) {
+      return showIntro ? '/intro' : '/home';
+    } else {
       return '/';
     }
   }
@@ -71,29 +72,30 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
+  // List of screens for the navigation bar
   final List<Widget> _widgetOptions = [
     HomePage(),
     CalendarPage(),
     CommunityPage(),
-    ProfilePage(),
+    DoctorContact(),
+    ProfilePage(),  // Ensure ProfilePage is in this list
   ];
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;
+      _selectedIndex = index;  // This will handle valid index from navigation
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: TopBar(title: 'Ovelia'), // Add the TopBar here
       body: BackgroundGradient(
-        child: _widgetOptions.elementAt(_selectedIndex),
+        child: _widgetOptions.elementAt(_selectedIndex), // Select screen based on index
       ),
       bottomNavigationBar: BottomNavigation(
         selectedIndex: _selectedIndex,
-        onItemTapped: _onItemTapped,
+        onItemTapped: _onItemTapped, // Update the index on tab change
       ),
     );
   }
