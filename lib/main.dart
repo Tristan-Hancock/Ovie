@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:ovie/pages/chat/chat_screen.dart';
+import 'package:ovie/pages/doctors/DoctorContact.dart';
 import 'widgets/bottom_navigation.dart';
 import 'widgets/background_gradient.dart';
 import 'pages/home_page.dart';
@@ -76,7 +77,7 @@ class _MainScreenState extends State<MainScreen> {
     HomePage(),
     CalendarPage(),
     CommunityPage(),
-    ChatScreen(),
+    DoctorContact(),
     ProfilePage(),  // Ensure ProfilePage is in this list
   ];
 
