@@ -15,7 +15,7 @@ class IntroScreen extends StatelessWidget {
                 SizedBox(height: 40),
                 Center(
                   child: Text(
-                    "ovie.",
+                    "Ovelia",
                     style: GoogleFonts.bonaNova(
                       fontSize: 65,
                       color: Colors.black,
