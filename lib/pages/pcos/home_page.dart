@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ovie/pages/pcos/logging.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -187,82 +188,11 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               SizedBox(height: 20),
+              LoggingSection(), 
               // Today's log section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Today\'s log',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.filter_alt_outlined, color: Colors.black),
-                    onPressed: () {
-                      // Filter options
-                    },
-                  ),
-                ],
-              ),
-              Column(
-                children: [
-                  _buildCheckbox('Menstruation', _isMenstruationChecked, (val) {
-                    setState(() {
-                      _isMenstruationChecked = val!;
-                    });
-                  }),
-                  _buildCheckbox('Cramps', _isCrampsChecked, (val) {
-                    setState(() {
-                      _isCrampsChecked = val!;
-                    });
-                  }),
-                  _buildCheckbox('Symptom 1', _isSymptom1Checked, (val) {
-                    setState(() {
-                      _isSymptom1Checked = val!;
-                    });
-                  }),
-                  _buildCheckbox('Symptom 2', _isSymptom2Checked, (val) {
-                    setState(() {
-                      _isSymptom2Checked = val!;
-                    });
-                  }),
-                ],
-              ),
-              SizedBox(height: 20),
-              // I feel section
-              Text(
-                'I feel',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildEmotionIcon('Smiling', 'assets/icons/smiling.png'), // Placeholder for PNG
-                  _buildEmotionIcon('Neutral', 'assets/icons/neutral.png'),  // Placeholder for PNG
-                  _buildEmotionIcon('Frowning', 'assets/icons/frowning.png'), // Placeholder for PNG
-                  _buildEmotionIcon('Pouting', 'assets/icons/pouting.png'),  // Placeholder for PNG
-                ],
-              ),
-              SizedBox(height: 20),
-              // Capture your day
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey, width: 1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(Icons.camera_alt_outlined, size: 40, color: Colors.grey),
-                    SizedBox(height: 10),
-                    Text(
-                      'Capture your day. Upload a selfie!',
-                      style: TextStyle(fontSize: 14, color: Colors.black),
-                    ),
-                  ],
-                ),
-              ),
+              
+        
+          
             ],
           ),
         ),
@@ -270,25 +200,5 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Function to build each checkbox for Today's Log
-  Widget _buildCheckbox(String title, bool value, Function(bool?) onChanged) {
-    return CheckboxListTile(
-      title: Text(title),
-      value: value,
-      onChanged: onChanged,
-      activeColor: Colors.pinkAccent,
-      checkColor: Colors.white,
-    );
-  }
-
-  // Function to build emotion icons with their label
-  Widget _buildEmotionIcon(String label, String assetPath) {
-    return Column(
-      children: [
-        Image.asset(assetPath, width: 40, height: 40), // Placeholder for emotion PNGs
-        SizedBox(height: 8),
-        Text(label, style: TextStyle(fontSize: 12, color: Colors.black)),
-      ],
-    );
-  }
+  
 }
