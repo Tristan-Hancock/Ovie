@@ -123,9 +123,10 @@ class _HomePageState extends State<HomePage> {
             child: Text(
               'Ovelia',
               style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
                 color: Colors.black,
+                fontFamily: 'Quicksand',
               ),
             ),
           ),
