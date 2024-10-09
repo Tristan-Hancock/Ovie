@@ -2,20 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ovie/pages/pcos/logging.dart';
+import 'package:ovie/services/objectbox.dart';
+
 
 class HomePage extends StatefulWidget {
+  final ObjectBox objectBox; // ObjectBox instance
+  
+  HomePage({required this.objectBox});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
 
+
 class _HomePageState extends State<HomePage> {
   String _username = 'User';
 
-  // For Today's Log checkboxes
-  bool _isMenstruationChecked = false;
-  bool _isCrampsChecked = false;
-  bool _isSymptom1Checked = false;
-  bool _isSymptom2Checked = false;
+
 
   @override
   void initState() {
@@ -34,6 +37,11 @@ class _HomePageState extends State<HomePage> {
       }
     }
   }
+
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -188,8 +196,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               SizedBox(height: 20),
-              LoggingSection(), 
-              // Today's log section
+              LoggingSection(objectBox: widget.objectBox,),
               
         
           

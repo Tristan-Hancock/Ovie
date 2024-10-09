@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -16,25 +15,41 @@ import 'pages/useraccount/Authpage.dart';
 import 'pages/useraccount/profile.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'widgets/top_bar.dart'; // Import the TopBar
-
+import 'services/objectbox.dart'; // Import ObjectBox service
+import 'package:ovie/objectbox.g.dart';
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   print('Handling a background message: ${message.messageId}');
 }
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  bool showIntro = await IntroCheck.isFirstTime(); // Check if it's the first time
+
+  // Initialize Firebase
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // Check if it's the first time the app is opened
+  bool showIntro = await IntroCheck.isFirstTime();
+  
+  // Initialize ObjectBox
+  final objectBox = await ObjectBox.create(); // Initialize ObjectBox
+
   User? currentUser = FirebaseAuth.instance.currentUser;
-runApp(MyApp(showIntro: showIntro, isLoggedIn: currentUser !=null));
+
+  runApp(MyApp(
+    showIntro: showIntro, 
+    isLoggedIn: currentUser != null,
+    objectBox: objectBox, // Pass the ObjectBox instance to the app
+  ));
 }
 
 class MyApp extends StatelessWidget {
   final bool showIntro;
   final bool isLoggedIn;
+  final ObjectBox objectBox; // Add ObjectBox to the app
 
-  MyApp({required this.showIntro, required this.isLoggedIn});
+  MyApp({required this.showIntro, required this.isLoggedIn, required this.objectBox});
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +62,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => AuthPage(),
         '/intro': (context) => IntroScreen(),
-        '/home': (context) => MainScreen(),
+        '/home': (context) => MainScreen(objectBox: objectBox), // Pass ObjectBox to MainScreen
         '/calendar': (context) => CalendarPage(),
         '/community': (context) => CommunityPage(),
         '/profile': (context) => ProfilePage(),
@@ -65,6 +80,10 @@ class MyApp extends StatelessWidget {
 }
 
 class MainScreen extends StatefulWidget {
+  final ObjectBox objectBox; // Receive ObjectBox in MainScreen
+
+  MainScreen({required this.objectBox});
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -73,17 +92,25 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
   // List of screens for the navigation bar
-  final List<Widget> _widgetOptions = [
-    HomePage(),
-    CalendarPage(),
-    CommunityPage(),
-    DoctorContact(),
-    ProfilePage(),  // Ensure ProfilePage is in this list
-  ];
+  late List<Widget> _widgetOptions;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Initialize the screen options with ObjectBox passed to each screen
+    _widgetOptions = [
+      HomePage(objectBox: widget.objectBox), // Pass ObjectBox to HomePage
+      CalendarPage(),
+      CommunityPage(),
+      DoctorContact(),
+      ProfilePage(),
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;  // This will handle valid index from navigation
+      _selectedIndex = index; // This will handle valid index from navigation
     });
   }
 
