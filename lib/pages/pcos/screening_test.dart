@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'pcos_results.dart'; // Import the PcosResultsPage here
 
 class ScreeningTestPage extends StatelessWidget {
   @override
@@ -11,7 +12,7 @@ class ScreeningTestPage extends StatelessWidget {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white), // Back arrow icon
           onPressed: () {
-            Navigator.pop(context); // Go back to the previous page
+            Navigator.pop(context); // Go back to the previous page (HomePage)
           },
         ),
       ),
@@ -24,10 +25,13 @@ class ScreeningTestPage extends StatelessWidget {
             Text(
               'The\nPCOS\nScreening\nTest',
               style: TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+                fontFamily: 'Quicksand', // Font family from the settings
+                fontWeight: FontWeight.w300, // SemiBold is equivalent to w600
+                fontSize: 48, // Font size set to 48
+                color: Color(0xFFFDE7E7), // Text color from the 'Fill' section in the image
+                height: 1.2, // Adjust the line height if needed to match Figma's spacing
               ),
+              textAlign: TextAlign.left, // Align text to the left as shown in the image
             ),
             SizedBox(height: 20), // Space between the title and description
             Text(
@@ -44,7 +48,13 @@ class ScreeningTestPage extends StatelessWidget {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  // Handle button press for Start Screening
+                  // Navigate to the PCOS Results Page when Start Screening is pressed
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PcosResultsPage(), // Navigate to PcosResultsPage
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFFBBBFFE), // Color matching the app theme
@@ -68,7 +78,7 @@ class ScreeningTestPage extends StatelessWidget {
             Center(
               child: OutlinedButton(
                 onPressed: () {
-                  // Handle button press for About the Test
+                  // Define action for About the Test if needed
                 },
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: Color(0xFFBBBFFE), width: 2), // Border color to match theme
@@ -92,7 +102,7 @@ class ScreeningTestPage extends StatelessWidget {
             Center(
               child: OutlinedButton(
                 onPressed: () {
-                  // Handle button press for Learn more about PCOS
+                  // Define action for Learn more about PCOS if needed
                 },
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: Color(0xFFBBBFFE), width: 2), // Border color to match theme
