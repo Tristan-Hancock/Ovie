@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ovie/pages/pcos/logging.dart';
+import 'package:ovie/pages/pcos/screening_test.dart';
 import 'package:ovie/services/objectbox.dart';
 
 
@@ -47,6 +48,7 @@ class _HomePageState extends State<HomePage> {
   child: AppBar(
     backgroundColor: Color(0xFFBBBFFE), // AppBar background color from Figma design
     elevation: 0,
+    automaticallyImplyLeading: false,
     flexibleSpace: Stack(
       children: [
         // Logo, Username and Greeting text
@@ -143,6 +145,7 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.more_vert, color: Colors.black),
             onPressed: () {
               // Placeholder for more actions
+              
             },
           ),
         ),
@@ -153,52 +156,76 @@ class _HomePageState extends State<HomePage> {
 
   
 
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
+     body: Padding(
+  padding: const EdgeInsets.all(16.0),
+  child: SingleChildScrollView(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // "Did you know?" section
+        Container(
+          padding: EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: Color(0xFFFFE6E8), // Light red/pink background
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // "Did you know?" section
-              Container(
-                padding: EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Color(0xFFFFE6E8), // Light red/pink background
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Did you know?',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'PCOS is the most common hormonal disorder affecting women of reproductive age.',
-                      style: TextStyle(fontSize: 14, color: Colors.black),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'Haven\'t taken the PCOS screening test yet?',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
-                    ),
-                    Text(
-                      'Start screening',
-                      style: TextStyle(fontSize: 14, color: Colors.pinkAccent, decoration: TextDecoration.underline),
-                    ),
-                  ],
-                ),
+              Text(
+                'Did you know?',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
               ),
-              SizedBox(height: 20),
-              LoggingSection(objectBox: widget.objectBox,),
-              
-        
-          
+              SizedBox(height: 8),
+              Text(
+                'PCOS is the most common hormonal disorder affecting women of reproductive age.',
+                style: TextStyle(fontSize: 14, color: Colors.black),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Haven\'t taken the PCOS screening test yet?',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
+              ),
             ],
           ),
         ),
+        SizedBox(height: 16), // Add some space between the container and the button
+
+        // Start Screening Button
+      Center(
+  child: ElevatedButton(
+    onPressed: () {
+      // Define your button action to navigate to the PCOS Screening Test
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ScreeningTestPage()),
+      );
+    },
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Color(0xFFBBBFFE), // Button color to match the app bar
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(30.0), // Rounded corners
       ),
+      padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15), // Adjust padding for button size
+    ),
+    child: Text(
+      'Start Screening',
+      style: TextStyle(
+        fontSize: 16,
+        color: const Color.fromARGB(255, 9, 9, 9), // Text color and size
+      ),
+    ),
+  ),
+),
+
+        
+        SizedBox(height: 20), // Space between the button and the LoggingSection
+        LoggingSection(objectBox: widget.objectBox), // Logging Section
+      ],
+    ),
+  ),
+),
+
     );
   }
 
