@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart'; // Import only once
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -5,7 +7,7 @@ import 'package:ovie/objectbox.g.dart';
 import 'package:ovie/services/models.dart';
 import 'package:ovie/services/objectbox.dart';
 import 'package:ovie/services/models.dart' as UserModel;
-
+import 'package:image_picker/image_picker.dart';
 class LoggingSection extends StatefulWidget {
   final ObjectBox objectBox; // ObjectBox instance
 
@@ -23,7 +25,7 @@ class _LoggingSectionState extends State<LoggingSection> {
   bool _isHeadachesChecked = false;
   String _selectedEmotion = 'Smiling'; // Default emotion
   String? _imagePath; // For selfie image path
-
+  final ImagePicker _picker = ImagePicker();
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -113,10 +115,14 @@ class _LoggingSectionState extends State<LoggingSection> {
         ),
         SizedBox(height: 20),
         // Log for today button
-        ElevatedButton(
-          onPressed: _logForToday, // Handle log submission
-          child: Text('Log for Today'),
-        ),
+       ElevatedButton(
+  onPressed: _logForToday, // Handle log submission
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Color(0xFFBBBFFE), // Match the app bar color
+  ),
+  child: Text('Log for Today'),
+),
+
       ],
     );
   }
@@ -155,9 +161,19 @@ class _LoggingSectionState extends State<LoggingSection> {
       ],
     );
   }
+Future<void> _pickImage() async {
+  final pickedFile = await _picker.pickImage(source: ImageSource.gallery); // Use gallery for now
+  if (pickedFile != null) {
+    setState(() {
+      _imagePath = pickedFile.path;
+    });
+  }
+}
 
-  Widget _buildCaptureSelfie() {
-    return Container(
+Widget _buildCaptureSelfie() {
+  return GestureDetector(
+    onTap: _pickImage, // Call function to pick an image
+    child: Container(
       width: 150, // Adjust width to make it slightly wider
       height: 220, // Increased height to align with the top of the "I feel" text
       padding: EdgeInsets.all(16),
@@ -168,7 +184,14 @@ class _LoggingSectionState extends State<LoggingSection> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.camera_alt_outlined, size: 40, color: Colors.grey),
+          _imagePath == null
+              ? Icon(Icons.camera_alt_outlined, size: 40, color: Colors.grey)
+              : Image.file(
+                  File(_imagePath!), // Show the selected image
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
+                ),
           SizedBox(height: 10),
           Text(
             'Capture your day.\nUpload a selfie!',
@@ -177,42 +200,57 @@ class _LoggingSectionState extends State<LoggingSection> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   // Function to log today's data to ObjectBox
-  void _logForToday() {
-    String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+// Function to log today's data to ObjectBox
+void _logForToday() {
+  String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-    // Create a new daily log
-    DailyLog log = DailyLog(
-      date: currentDate,
-      isMenstruation: _isMenstruationChecked,
-      isCramps: _isCrampsChecked,
-      isAcne: _isAcneChecked,
-      isHeadaches: _isHeadachesChecked,
-      emotion: _selectedEmotion,
-      imagePath: _imagePath, // Handle the image path here
-    );
+  // Create a new daily log
+  DailyLog log = DailyLog(
+    date: currentDate,
+    isMenstruation: _isMenstruationChecked,
+    isCramps: _isCrampsChecked,
+    isAcne: _isAcneChecked,
+    isHeadaches: _isHeadachesChecked,
+    emotion: _selectedEmotion,
+    imagePath: _imagePath, // Handle the image path here
+  );
 
-    // Find or create a user entry for the current user in ObjectBox
-   var user = widget.objectBox.userBox
-    .query(User_.userId.equals(FirebaseAuth.instance.currentUser!.uid))
-    .build()
-    .findFirst() ?? UserModel.User(userId: FirebaseAuth.instance.currentUser!.uid);
+  // Find or create a user entry for the current user in ObjectBox
+  var user = widget.objectBox.userBox
+      .query(User_.userId.equals(FirebaseAuth.instance.currentUser!.uid))
+      .build()
+      .findFirst() ?? UserModel.User(userId: FirebaseAuth.instance.currentUser!.uid);
 
-
-    if (user.id == 0) {
-      widget.objectBox.userBox.put(user); // Save user if not exists
-    }
-
-    // Link the log to the current user
-    log.user.target = user;
-
-    // Save the log to ObjectBox
-    widget.objectBox.dailyLogBox.put(log);
-
-    // Print log message
-    print('Log for $currentDate saved successfully.');
+  if (user.id == 0) {
+    widget.objectBox.userBox.put(user); // Save user if not exists
   }
+
+  // Link the log to the current user
+  log.user.target = user;
+
+  // Save the log to ObjectBox
+  widget.objectBox.dailyLogBox.put(log);
+
+  // Show success message with a SnackBar
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content: Text('Log for $currentDate saved successfully!'),
+  ));
+
+  // Print log data for debugging
+  print('--- Daily Log ---');
+  print('Date: $currentDate');
+  print('Menstruation: $_isMenstruationChecked');
+  print('Cramps: $_isCrampsChecked');
+  print('Acne: $_isAcneChecked');
+  print('Headaches: $_isHeadachesChecked');
+  print('Emotion: $_selectedEmotion');
+  print('Image Path: $_imagePath');
+}
+
 }
