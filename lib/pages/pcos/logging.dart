@@ -26,106 +26,133 @@ class _LoggingSectionState extends State<LoggingSection> {
   String _selectedEmotion = 'Smiling'; // Default emotion
   String? _imagePath; // For selfie image path
   final ImagePicker _picker = ImagePicker();
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Today's Log section
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Today\'s log',
-              style: TextStyle(
-                fontSize: 16, // Smaller font size
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            IconButton(
-              icon: Icon(Icons.filter_alt_outlined, color: Colors.white),
-              onPressed: () {
-                // Add filter functionality here if needed
-              },
-            ),
-          ],
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildCheckbox('Menstruation', _isMenstruationChecked, (val) {
-              setState(() {
-                _isMenstruationChecked = val!;
-              });
-            }),
-            _buildCheckbox('Cramps', _isCrampsChecked, (val) {
-              setState(() {
-                _isCrampsChecked = val!;
-              });
-            }),
-          ],
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildCheckbox('Acne', _isAcneChecked, (val) {
-              setState(() {
-                _isAcneChecked = val!;
-              });
-            }),
-            _buildCheckbox('Headaches', _isHeadachesChecked, (val) {
-              setState(() {
-                _isHeadachesChecked = val!;
-              });
-            }),
-          ],
-        ),
-        SizedBox(height: 20),
+ // Inside the build method
 
-        // I feel section
-        Text(
-          'I feel',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        SizedBox(height: 4), // Reduce the height to move the icons closer to the label
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start, // Align the icons closer to the top
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start, // Adjusts vertical positioning of the icons
-              children: [
-                _buildEmotionIcon('Smiling', 'assets/icons/smiling.png'),
-                SizedBox(width: 8), // Adjust space between the icons
-                _buildEmotionIcon('Neutral', 'assets/icons/neutral.png'),
-                SizedBox(width: 8), // Adjust space between the icons
-                _buildEmotionIcon('Frowning', 'assets/icons/frowning.png'),
-                SizedBox(width: 8), // Adjust space between the icons
-                _buildEmotionIcon('Pouting', 'assets/icons/pouting.png'),
-              ],
+
+// Inside the build method
+@override
+Widget build(BuildContext context) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      // Today's Log section
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Today\'s log',
+            style: TextStyle(
+              fontSize: 16, // Smaller font size
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
-            // Add the longer selfie capture section beside the icons
-            _buildCaptureSelfie(),
-          ],
+          ),
+          IconButton(
+            icon: Icon(Icons.filter_alt_outlined, color: Colors.white),
+            onPressed: () {
+              // Add filter functionality here if needed
+            },
+          ),
+        ],
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _buildCheckbox('Menstruation', _isMenstruationChecked, (val) {
+            setState(() {
+              _isMenstruationChecked = val!;
+            });
+          }),
+          _buildCheckbox('Cramps', _isCrampsChecked, (val) {
+            setState(() {
+              _isCrampsChecked = val!;
+            });
+          }),
+        ],
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _buildCheckbox('Acne', _isAcneChecked, (val) {
+            setState(() {
+              _isAcneChecked = val!;
+            });
+          }),
+          _buildCheckbox('Headaches', _isHeadachesChecked, (val) {
+            setState(() {
+              _isHeadachesChecked = val!;
+            });
+          }),
+        ],
+      ),
+      SizedBox(height: 20),
+
+      // I feel section
+      Text(
+        'I feel',
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
         ),
-        SizedBox(height: 20),
-        // Log for today button
-       ElevatedButton(
-  onPressed: _logForToday, // Handle log submission
-  style: ElevatedButton.styleFrom(
-    backgroundColor: Color(0xFFBBBFFE), // Match the app bar color
-  ),
-  child: Text('Log for Today'),
+      ),
+      SizedBox(height: 4), // Reduce the height to move the icons closer to the label
+    Row(
+  crossAxisAlignment: CrossAxisAlignment.start, // Align the icons closer to the top
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  children: [
+    Row(
+      crossAxisAlignment: CrossAxisAlignment.start, // Adjusts vertical positioning of the icons
+      children: [
+        _buildEmotionIcon('Smiling', 'assets/icons/smiling.png'),
+        SizedBox(width: 8), // Adjust space between the icons
+        _buildEmotionIcon('Neutral', 'assets/icons/neutral.png'),
+        SizedBox(width: 8), // Adjust space between the icons
+        _buildEmotionIcon('Frowning', 'assets/icons/frowning.png'),
+        SizedBox(width: 8), // Adjust space between the icons
+        _buildEmotionIcon('Pouting', 'assets/icons/pouting.png'),
+      ],
+      
+    ),  
+    // Add the longer selfie capture section beside the icons
+    Column(
+      crossAxisAlignment: CrossAxisAlignment.end, // Align the button and selfie section to the right
+      children: [
+        _buildCaptureSelfie(),
+        SizedBox(height: 10), // Space between selfie section and button
+        // Add the "Log for Today" button below the selfie capture
+        ElevatedButton(
+          onPressed: _logForToday, // Handle log submission
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Color(0xFFBBBFFE), // Match the app bar color
+          ),
+          child: Text('Log for Today'),
+        ),
+      ],
+    ),
+  ],
 ),
 
-      ],
-    );
-  }
+      
+      // SizedBox(height: 10), // Space between icons and the button
+
+      // Move the button higher, just below the emotion icons
+      // Align(
+      //   alignment: Alignment.centerLeft, // Align to the left side
+      //   child: ElevatedButton(
+      //     onPressed: _logForToday, // Handle log submission
+      //     style: ElevatedButton.styleFrom(
+      //       backgroundColor: Color(0xFFBBBFFE), // Match the app bar color
+      //     ),
+      //     child: Text('Log for Today'),
+      //   ),
+      // ),
+    ],
+  );
+}
+
+
+
 
   // Function to build each checkbox for Today's Log
   Widget _buildCheckbox(String title, bool value, Function(bool?) onChanged) {
@@ -146,21 +173,37 @@ class _LoggingSectionState extends State<LoggingSection> {
   }
 
   // Function to build emotion icons with their label
-  Widget _buildEmotionIcon(String label, String assetPath) {
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              _selectedEmotion = label; // Set the selected emotion
-            });
-          },
-          child: Image.asset(assetPath, width: 40, height: 40), // Adjust icon size
+// Function to build emotion icons with their label
+Widget _buildEmotionIcon(String label, String assetPath) {
+  bool isSelected = _selectedEmotion == label; // Check if this emotion is selected
+
+  return Column(
+    children: [
+      GestureDetector(
+        onTap: () {
+          setState(() {
+            _selectedEmotion = label; // Set the selected emotion
+          });
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle, // Make the border circular
+            border: isSelected
+                ? Border.all(color: Color(0xFFBBBFFE), width: 3) // Circular outline for the selected emotion
+                : null, // No border if not selected
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(1.0), // Add some padding inside the border
+            child: Image.asset(assetPath, width: 40, height: 40), // Adjust icon size
+          ),
         ),
-        SizedBox(height: 8),
-      ],
-    );
-  }
+      ),
+      SizedBox(height: 8),
+    ],
+  );
+}
+
+
 Future<void> _pickImage() async {
   final pickedFile = await _picker.pickImage(source: ImageSource.gallery); // Use gallery for now
   if (pickedFile != null) {
