@@ -1,6 +1,5 @@
 import 'package:objectbox/objectbox.dart';
 
-
 @Entity()
 class User {
   int id;
@@ -8,7 +7,6 @@ class User {
 
   User({this.id = 0, required this.userId});
 }
-
 
 @Entity()
 class DailyLog {
@@ -31,5 +29,19 @@ class DailyLog {
     required this.isHeadaches,
     required this.emotion,
     this.imagePath,
+  });
+}
+
+@Entity()
+class PeriodTracking {
+  int id;
+  DateTime startDate; // The start date of the period
+  DateTime endDate; // The end date of the period
+  final user = ToOne<User>(); // Link to User
+
+  PeriodTracking({
+    this.id = 0,
+    required this.startDate,
+    required this.endDate,
   });
 }

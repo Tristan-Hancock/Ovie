@@ -12,6 +12,7 @@ import 'package:flat_buffers/flat_buffers.dart' as fb;
 import 'package:objectbox/internal.dart'
     as obx_int; // generated code can access "internal" functionality
 import 'package:objectbox/objectbox.dart' as obx;
+import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
 
 import 'services/models.dart';
 
@@ -92,6 +93,37 @@ final _entities = <obx_int.ModelEntity>[
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(3, 3085642789460672247),
+      name: 'PeriodTracking',
+      lastPropertyId: const obx_int.IdUid(4, 6048038955829759117),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 7860658927008926697),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 1826707580310391581),
+            name: 'startDate',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(3, 301183330042250849),
+            name: 'endDate',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(4, 6048038955829759117),
+            name: 'userId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(2, 4149379467928489541),
+            relationTarget: 'User')
+      ],
+      relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[])
 ];
 
@@ -106,16 +138,17 @@ final _entities = <obx_int.ModelEntity>[
 /// For Flutter apps, also calls `loadObjectBoxLibraryAndroidCompat()` from
 /// the ObjectBox Flutter library to fix loading the native ObjectBox library
 /// on Android 6 and older.
-obx.Store openStore(
+Future<obx.Store> openStore(
     {String? directory,
     int? maxDBSizeInKB,
     int? maxDataSizeInKB,
     int? fileMode,
     int? maxReaders,
     bool queriesCaseSensitiveDefault = true,
-    String? macosApplicationGroup}) {
+    String? macosApplicationGroup}) async {
+  await loadObjectBoxLibraryAndroidCompat();
   return obx.Store(getObjectBoxModel(),
-      directory: directory,
+      directory: directory ?? (await defaultStoreDirectory()).path,
       maxDBSizeInKB: maxDBSizeInKB,
       maxDataSizeInKB: maxDataSizeInKB,
       fileMode: fileMode,
@@ -129,8 +162,8 @@ obx.Store openStore(
 obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
       entities: _entities,
-      lastEntityId: const obx_int.IdUid(2, 5977605681870573576),
-      lastIndexId: const obx_int.IdUid(1, 2376494571298422472),
+      lastEntityId: const obx_int.IdUid(3, 3085642789460672247),
+      lastIndexId: const obx_int.IdUid(2, 4149379467928489541),
       lastRelationId: const obx_int.IdUid(0, 0),
       lastSequenceId: const obx_int.IdUid(0, 0),
       retiredEntityUids: const [],
@@ -228,6 +261,39 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final object = User(id: idParam, userId: userIdParam);
 
           return object;
+        }),
+    PeriodTracking: obx_int.EntityDefinition<PeriodTracking>(
+        model: _entities[2],
+        toOneRelations: (PeriodTracking object) => [object.user],
+        toManyRelations: (PeriodTracking object) => {},
+        getId: (PeriodTracking object) => object.id,
+        setId: (PeriodTracking object, int id) {
+          object.id = id;
+        },
+        objectToFB: (PeriodTracking object, fb.Builder fbb) {
+          fbb.startTable(5);
+          fbb.addInt64(0, object.id);
+          fbb.addInt64(1, object.startDate.millisecondsSinceEpoch);
+          fbb.addInt64(2, object.endDate.millisecondsSinceEpoch);
+          fbb.addInt64(3, object.user.targetId);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+          final idParam =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+          final startDateParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 6, 0));
+          final endDateParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0));
+          final object = PeriodTracking(
+              id: idParam, startDate: startDateParam, endDate: endDateParam);
+          object.user.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0);
+          object.user.attach(store);
+          return object;
         })
   };
 
@@ -281,4 +347,23 @@ class User_ {
   /// See [User.userId].
   static final userId =
       obx.QueryStringProperty<User>(_entities[1].properties[1]);
+}
+
+/// [PeriodTracking] entity fields to define ObjectBox queries.
+class PeriodTracking_ {
+  /// See [PeriodTracking.id].
+  static final id =
+      obx.QueryIntegerProperty<PeriodTracking>(_entities[2].properties[0]);
+
+  /// See [PeriodTracking.startDate].
+  static final startDate =
+      obx.QueryDateProperty<PeriodTracking>(_entities[2].properties[1]);
+
+  /// See [PeriodTracking.endDate].
+  static final endDate =
+      obx.QueryDateProperty<PeriodTracking>(_entities[2].properties[2]);
+
+  /// See [PeriodTracking.user].
+  static final user =
+      obx.QueryRelationToOne<PeriodTracking, User>(_entities[2].properties[3]);
 }
