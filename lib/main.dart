@@ -17,6 +17,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'widgets/top_bar.dart'; // Import the TopBar
 import 'services/objectbox.dart'; // Import ObjectBox service
 import 'package:ovie/objectbox.g.dart';
+
+
+
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   print('Handling a background message: ${message.messageId}');
@@ -63,7 +66,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => AuthPage(),
         '/intro': (context) => IntroScreen(),
         '/home': (context) => MainScreen(objectBox: objectBox), // Pass ObjectBox to MainScreen
-        '/calendar': (context) => CalendarPage(),
+        '/calendar': (context) => CalendarPage(objectBox: objectBox,),
         '/community': (context) => CommunityPage(),
         '/profile': (context) => ProfilePage(),
       },
@@ -101,7 +104,7 @@ class _MainScreenState extends State<MainScreen> {
     // Initialize the screen options with ObjectBox passed to each screen
     _widgetOptions = [
       HomePage(objectBox: widget.objectBox), // Pass ObjectBox to HomePage
-      CalendarPage(),
+      CalendarPage(objectBox: widget.objectBox,),
       CommunityPage(),
       DoctorContact(),
       ProfilePage(),
