@@ -7,7 +7,7 @@ import 'package:ovie/pages/doctors/DoctorContact.dart';
 import 'widgets/bottom_navigation.dart';
 import 'widgets/background_gradient.dart';
 import 'pages/pcos/home_page.dart';
-import 'pages/calendar_page.dart';
+import 'pages/calendar/calendar_page.dart';
 import 'pages/communityscreen/communityfeed.dart';
 import 'pages/important_intro/intro_check.dart';
 import 'pages/important_intro/intro_screen.dart';
