@@ -9,11 +9,14 @@ class ObjectBox {
   // Boxes to store the data
   late final Box<User> userBox;
   late final Box<DailyLog> dailyLogBox;
+  late final Box<PeriodTracking> periodTrackingBox;
 
   ObjectBox._create(this.store) {
     // Assign the boxes
     userBox = Box<User>(store);
     dailyLogBox = Box<DailyLog>(store);
+    periodTrackingBox = Box<PeriodTracking>(store); // Initialize PeriodTracking Box
+
   }
 
   /// Create an instance of ObjectBox to manage the database
