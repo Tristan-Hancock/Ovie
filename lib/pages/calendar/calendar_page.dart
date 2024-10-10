@@ -28,7 +28,7 @@ class CalendarPage extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Calendar(), // Call the scrollable calendar here
+        child: CalendarDates(), // Call the scrollable calendar here
       ),
     );
   }
