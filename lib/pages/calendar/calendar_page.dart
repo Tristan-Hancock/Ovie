@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:ovie/services/objectbox.dart';
 import 'calendar_dates.dart';
 
 class CalendarPage extends StatelessWidget {
+
+  final ObjectBox objectBox; // Pass ObjectBox instance to save data
+
+  CalendarPage({Key? key, required this.objectBox}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,7 +34,7 @@ class CalendarPage extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: CalendarDates(), // Call the scrollable calendar here
+        child: CalendarDates(objectBox: objectBox), // Call the scrollable calendar here
       ),
     );
   }

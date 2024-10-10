@@ -26,6 +26,8 @@ class ObjectBox {
 
     // Ensure the directory is correct and writable
     final store = await openStore(directory: "${appDir.path}/objectbox");
+    assert(store != null, 'ObjectBox store could not be opened'); // Add this assert
+
 
     return ObjectBox._create(store);
   }
