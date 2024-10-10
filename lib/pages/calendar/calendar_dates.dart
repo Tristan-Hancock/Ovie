@@ -14,12 +14,20 @@ class _CalendarDatesState extends State<CalendarDates> {
   final calendarController = CleanCalendarController(
     minDate: DateTime.now().subtract(Duration(days: 365)), // One year ago
     maxDate: DateTime.now().add(Duration(days: 365)), // One year in the future
+    initialFocusDate: DateTime.now(), // Focus on the current date
     weekdayStart: DateTime.monday, // Start the calendar on Monday
     
     onRangeSelected: (minDate, maxDate) {
       print('Selected range: $minDate - $maxDate');
     },
   );
+
+  @override
+  void initState() {
+    super.initState();
+    // Debug to check the min date setup
+    print('Calendar minDate: ${calendarController.minDate}');
+  }
 
   @override
   Widget build(BuildContext context) {
