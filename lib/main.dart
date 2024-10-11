@@ -64,7 +64,7 @@ class MyApp extends StatelessWidget {
       initialRoute: _initialRoute(),
       routes: {
         '/': (context) => AuthPage(),
-        // '/intro': (context) => IntroScreen(),
+        '/intro': (context) => IntroScreen(),
         '/home': (context) => MainScreen(objectBox: objectBox), // Pass ObjectBox to MainScreen
         '/calendar': (context) => CalendarPage(objectBox: objectBox,),
         '/community': (context) => CommunityPage(),
