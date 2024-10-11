@@ -29,7 +29,7 @@ class _CalendarDatesState extends State<CalendarDates> {
   List<DailyLog> dailyLogs = []; // List to store fetched daily logs
   DailyReport? dailyReport; // Instance of DailyReport
 
-  @override
+ @override
   void initState() {
     super.initState();
     calendarController = CleanCalendarController(
@@ -38,10 +38,28 @@ class _CalendarDatesState extends State<CalendarDates> {
       initialFocusDate: DateTime.now(),
       weekdayStart: DateTime.monday,
       onRangeSelected: _onRangeSelected,
+      onDayTapped: _onDayTapped,
     );
-    dailyReport = DailyReport(objectBox: widget.objectBox); // Initialize DailyReport
-    _loadSavedPeriodsAndLogs(); // Load previously saved periods and logs
-    print('Calendar minDate: ${calendarController.minDate}');
+    dailyReport = DailyReport(objectBox: widget.objectBox);
+    _loadSavedPeriodsAndLogs();
+  }
+
+  void _onDayTapped(DateTime date) {
+    if (_isDateLogged(date)) {
+      _showLogDetailsForDate(date);
+    } else {
+      // If it's not a logged date, we'll handle it as part of range selection
+      _onRangeSelected(date, null);
+    }
+  }
+
+  void _onRangeSelected(DateTime start, DateTime? end) {
+    print('Range selected: $start - $end');
+    setState(() {
+      startDate = start;
+      endDate = end;
+      showButton = true;
+    });
   }
 
   // Load saved periods and daily logs
@@ -88,15 +106,7 @@ class _CalendarDatesState extends State<CalendarDates> {
     }
   }
 
-  // Function to update the selected range when the user selects dates
-  void _onRangeSelected(DateTime start, DateTime? end) {
-    print('Range selected: $start - $end');
-    setState(() {
-      startDate = start;
-      endDate = end;
-      showButton = true;
-    });
-  }
+
 
   // Function to check if a date is within any saved period
   bool _isDateInSavedPeriods(DateTime date) {
@@ -187,55 +197,53 @@ class _CalendarDatesState extends State<CalendarDates> {
             showWeekdays: true,
             spaceBetweenMonthAndCalendar: 16.0,
 dayBuilder: (context, dayValues) {
-  bool isSaved = _isDateInSavedPeriods(dayValues.day); // Check if the date is in saved periods
-  bool isLogged = _isDateLogged(dayValues.day); // Check if the date has a log
-  bool isPredicted = _isDateInPredictedPeriods(dayValues.day); // Check if the date is in predicted periods
-  bool isSelected = dayValues.isSelected; // Check if the date is part of the currently selected range
+  bool isSaved = _isDateInSavedPeriods(dayValues.day);
+  bool isLogged = _isDateLogged(dayValues.day);
+  bool isPredicted = _isDateInPredictedPeriods(dayValues.day);
+  bool isSelected = dayValues.isSelected;
 
-  return Container(
-    decoration: BoxDecoration(
-      color: isLogged
-          ? Colors.lime // Highlight logged dates with lime green
-          : isSelected
-              ? (dayValues.selectedMinDate == dayValues.day || dayValues.selectedMaxDate == dayValues.day)
-                  ? Color(0xFFFF7BAA) // Start or end of the selected range
-                  : Color(0xFFBBBFFE) // Middle of the selected range
-              : isSaved
-                  ? Color(0xFFFF7BAA).withOpacity(0.5) // Highlight saved periods
-                  : isPredicted
-                      ? Color(0xFFBBBFFE).withOpacity(0.5) // Highlight predicted periods
-                      : Colors.transparent, // No highlight
-      shape: BoxShape.circle,
-    ),
-    alignment: Alignment.center,
-    child: Text(
-      '${dayValues.day.day}', // Display the day
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: 16,
-      ),
-    ),
-  );
-}
-
-
-          ),
-          if (showButton)
-            Positioned(
-              bottom: 20,
-              left: 20,
-              right: 20,
-              child: ElevatedButton(
-                onPressed: _savePeriodTracking,
-                child: Text('Track Cycle'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFFF7BAA),
-                  padding: EdgeInsets.symmetric(vertical: 15),
-                ),
+return Container(
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? (dayValues.selectedMinDate == dayValues.day || dayValues.selectedMaxDate == dayValues.day)
+                      ? Color(0xFFFF7BAA) // Start or end of the selected range
+                      : Color(0xFFBBBFFE) // Middle of the selected range
+                  : isSaved
+                      ? Color(0xFFFF7BAA).withOpacity(0.5) // Highlight saved periods
+                      : isPredicted
+                          ? Color(0xFFBBBFFE).withOpacity(0.5) // Highlight predicted periods
+                          : isLogged
+                              ? Colors.lime // Highlight logged dates
+                              : Colors.transparent, // No highlight
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              '${dayValues.day.day}',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
               ),
             ),
-        ],
+          );
+        },
       ),
-    );
+      if (showButton)
+        Positioned(
+          bottom: 20,
+          left: 20,
+          right: 20,
+          child: ElevatedButton(
+            onPressed: _savePeriodTracking,
+            child: Text('Track Cycle'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFFFF7BAA),
+              padding: EdgeInsets.symmetric(vertical: 15),
+            ),
+          ),
+        ),
+    ],
+  ),
+);
   }
 }
