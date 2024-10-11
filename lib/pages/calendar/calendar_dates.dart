@@ -7,6 +7,7 @@ import 'package:scrollable_clean_calendar/scrollable_clean_calendar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:scrollable_clean_calendar/utils/enums.dart';
 import 'package:scrollable_clean_calendar/models/day_values_model.dart';
+import 'period_prediction.dart'; // Import the PeriodPrediction class
 
 class CalendarDates extends StatefulWidget {
   final ObjectBox objectBox;
@@ -23,6 +24,7 @@ class _CalendarDatesState extends State<CalendarDates> {
   DateTime? startDate;
   DateTime? endDate;
   List<PeriodTracking> savedPeriods = []; // List to store saved periods
+  List<DateTime> predictedPeriods = []; // List to store predicted periods
 
   @override
   void initState() {
@@ -39,7 +41,7 @@ class _CalendarDatesState extends State<CalendarDates> {
     print('Calendar minDate: ${calendarController.minDate}');
   }
 
-  // Load saved periods from ObjectBox
+  // Load saved periods from ObjectBox and predict future cycles
   Future<void> _loadSavedPeriods() async {
     final firebaseUser = FirebaseAuth.instance.currentUser;
     if (firebaseUser == null) {
@@ -60,7 +62,10 @@ class _CalendarDatesState extends State<CalendarDates> {
 
       print('Loaded ${savedPeriods.length} saved periods');
 
-      // Update the calendar with the saved periods
+      // Predict the next periods using PeriodPrediction
+      final periodPrediction = PeriodPrediction(savedPeriods: savedPeriods);
+      predictedPeriods = periodPrediction.predictNextPeriods();
+
       setState(() {});
     } else {
       print('User not found');
@@ -82,6 +87,18 @@ class _CalendarDatesState extends State<CalendarDates> {
     for (var period in savedPeriods) {
       if (date.isAfter(period.startDate.subtract(Duration(days: 1))) &&
           date.isBefore(period.endDate.add(Duration(days: 1)))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Function to check if a date is within the predicted period
+  bool _isDateInPredictedPeriods(DateTime date) {
+    for (var predicted in predictedPeriods) {
+      if (date.isAtSameMomentAs(predicted) ||
+          (date.isAfter(predicted.subtract(Duration(days: 1))) &&
+           date.isBefore(predicted.add(Duration(days: 1))))) {
         return true;
       }
     }
@@ -153,33 +170,35 @@ class _CalendarDatesState extends State<CalendarDates> {
             monthTextStyle: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
             showWeekdays: true,
             spaceBetweenMonthAndCalendar: 16.0,
-     dayBuilder: (context, dayValues) {
-  bool isSaved = _isDateInSavedPeriods(dayValues.day); // Check if the date is in saved periods
-  bool isSelected = dayValues.isSelected; // Check if the date is part of the currently selected range
+            dayBuilder: (context, dayValues) {
+              bool isSaved = _isDateInSavedPeriods(dayValues.day); // Check if the date is in saved periods
+              bool isPredicted = _isDateInPredictedPeriods(dayValues.day); // Check if the date is predicted
+              bool isSelected = dayValues.isSelected; // Check if the date is part of the currently selected range
 
-  return Container(
+               return Container(
     decoration: BoxDecoration(
       color: isSelected
           ? (dayValues.selectedMinDate == dayValues.day || dayValues.selectedMaxDate == dayValues.day)
               ? Color(0xFFFF7BAA) // Start or end of the selected range
               : Color(0xFFBBBFFE) // Middle of the selected range
-          : isSaved
+          : isSaved 
               ? Color(0xFFFF7BAA).withOpacity(0.5) // Highlight saved periods
-              : Colors.transparent, // No highlight
+              : isPredicted
+                  ? Color(0xFFBBBFFE).withOpacity(0.5) // Highlight predicted periods
+                  : Colors.transparent, // No highlight
       shape: BoxShape.circle,
     ),
     alignment: Alignment.center,
+    
     child: Text(
       '${dayValues.day.day}', // Display the day
       style: TextStyle(
         color: Colors.white,
         fontSize: 16,
-      ),
     ),
-  );
-}
-
-
+  ),
+);
+            }
           ),
           if (showButton)
             Positioned(
@@ -192,6 +211,7 @@ class _CalendarDatesState extends State<CalendarDates> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFFFF7BAA),
                   padding: EdgeInsets.symmetric(vertical: 15),
+                  
                 ),
               ),
             ),
