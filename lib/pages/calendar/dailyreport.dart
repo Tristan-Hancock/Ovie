@@ -102,12 +102,34 @@ void showLogDetails(BuildContext context, ObjectBoxModel.DailyLog log) {
 
             SizedBox(width: 20), // Space between the two columns
 
-            // Right Column: "I'm feeling" and "I'm thinking" sections stacked
+            // Right Column: Progression circle placeholder, "I'm feeling" and "I'm thinking"
             Expanded(
               flex: 1,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Placeholder for the progression circle
+                  Container(
+                    height: 100, // Adjust height for the placeholder
+                    width: 100,  // Adjust width for the placeholder
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.grey[300]!),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Cycle Phase',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20), // Space between progression circle and sections
+
                   // "I'm feeling" Section
                   Text(
                     "I'm feeling",
@@ -157,7 +179,7 @@ void showLogDetails(BuildContext context, ObjectBoxModel.DailyLog log) {
                     ),
                     child: Center(
                       child: Text(
-                        log.imagePath != null ? "See Image" : "No data available",
+                        log.imagePath != null ? "Felt really good today" : "No data available",
                         style: TextStyle(
                           color: Colors.black,
                           fontSize: 16,
@@ -174,6 +196,7 @@ void showLogDetails(BuildContext context, ObjectBoxModel.DailyLog log) {
     },
   );
 }
+
 
 
 
