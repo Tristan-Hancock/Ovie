@@ -5,33 +5,22 @@ class PeriodPrediction {
 
   PeriodPrediction({required this.savedPeriods});
 
-  // Function to calculate the average cycle length in days (start-to-start)
-  int getAverageCycleLength() {
-    if (savedPeriods.length < 2) {
-      return 28; // Default to 28 days if there's not enough data
-    }
-
-    int totalDays = 0;
-    for (int i = 1; i < savedPeriods.length; i++) {
-      final prevPeriod = savedPeriods[i - 1];
-      final currentPeriod = savedPeriods[i];
-      totalDays += currentPeriod.startDate.difference(prevPeriod.startDate).inDays; // Difference between start dates
-    }
-
-    return (totalDays / (savedPeriods.length - 1)).round(); // Average cycle length
+  // Use a fixed cycle length of 28 days
+  int getCycleLength() {
+    return 28; // Fixed to 28 days
   }
 
-  // Predict future periods based on average cycle length
+  // Predict future periods based on a 28-day cycle
   List<DateTime> predictNextPeriods({int numberOfCycles = 1}) {
     final List<DateTime> predictedPeriods = [];
     
     if (savedPeriods.isNotEmpty) {
       final lastPeriod = savedPeriods.last;
-      DateTime nextStart = lastPeriod.startDate.add(Duration(days: getAverageCycleLength())); // Use startDate
+      DateTime nextStart = lastPeriod.startDate.add(Duration(days: getCycleLength())); // Use startDate with 28-day cycle
 
       for (int i = 0; i < numberOfCycles; i++) {
         predictedPeriods.add(nextStart);
-        nextStart = nextStart.add(Duration(days: getAverageCycleLength())); // Predict based on average cycle length
+        nextStart = nextStart.add(Duration(days: getCycleLength())); // Predict with fixed 28-day cycle
       }
     }
     return predictedPeriods;
