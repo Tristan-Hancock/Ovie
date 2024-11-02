@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'prescription_service.dart';
+import 'prescription_text_display.dart';
 
 class PrescriptionReader extends StatefulWidget {
   @override
@@ -11,6 +12,7 @@ class PrescriptionReader extends StatefulWidget {
 class _PrescriptionReaderState extends State<PrescriptionReader> {
   File? _selectedImage;
   String _extractedText = "Upload your prescriptions here to see the text.";
+  bool _isImageUploaded = false;
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -20,29 +22,35 @@ class _PrescriptionReaderState extends State<PrescriptionReader> {
       setState(() {
         _selectedImage = File(pickedFile.path);
         _extractedText = "Extracting text...";
+        _isImageUploaded = true;
       });
       _extractTextFromImage();
     }
   }
 
-Future<void> _extractTextFromImage() async {
-  if (_selectedImage == null) return;
+  Future<void> _extractTextFromImage() async {
+    if (_selectedImage == null) return;
 
-  try {
-    String text = await PrescriptionService.extractPrescriptionText(_selectedImage!);
-    setState(() {
-      _extractedText = text.isNotEmpty ? text : "No readable text found.";
-    });
-  } catch (e, stackTrace) {
-    print("Error: $e");
-    print("StackTrace: $stackTrace");  // Add stack trace to understand where it failed
-    setState(() {
-      _extractedText = "An error occurred while extracting text.";
-    });
+    try {
+      String text = await PrescriptionService.extractPrescriptionText(_selectedImage!);
+      setState(() {
+        _extractedText = text.isNotEmpty ? text : "No readable text found.";
+      });
+    } catch (e) {
+      setState(() {
+        _extractedText = "An error occurred while extracting text.";
+      });
+    }
   }
-}
 
-
+  void _openPrescription() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PrescriptionTextDisplay(text: _extractedText),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,9 +67,9 @@ Future<void> _extractTextFromImage() async {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
@@ -80,25 +88,17 @@ Future<void> _extractTextFromImage() async {
               child: Text('Upload Picture'),
             ),
             SizedBox(height: 20),
-            _selectedImage != null
-                ? Image.file(_selectedImage!, height: 200)
-                : Container(),
-            SizedBox(height: 20),
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: SingleChildScrollView(
-                  child: Text(
-                    _extractedText,
-                    style: TextStyle(fontSize: 16, color: Colors.black),
+            if (_isImageUploaded)
+              ElevatedButton(
+                onPressed: _openPrescription,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFFBBBFFE),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
+                child: Text('Open Prescription'),
               ),
-            ),
           ],
         ),
       ),
