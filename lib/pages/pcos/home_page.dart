@@ -162,33 +162,33 @@ class _HomePageState extends State<HomePage> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // "Did you know?" section
-        Container(
-          padding: EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: Color(0xFFFFE6E8), // Light red/pink background
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Did you know?',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'PCOS is the most common hormonal disorder affecting women of reproductive age.',
-                style: TextStyle(fontSize: 14, color: Colors.black),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Haven\'t taken the PCOS screening test yet?',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
-              ),
-            ],
-          ),
-        ),
+        // "Did you know?" section ADD BACK LATER THIS IS FOR PRESENRATION 
+        // Container(
+        //   padding: EdgeInsets.all(16.0),
+        //   decoration: BoxDecoration(
+        //     color: Color(0xFFFFE6E8), // Light red/pink background
+        //     borderRadius: BorderRadius.circular(12),
+        //   ),
+        //   child: Column(
+        //     crossAxisAlignment: CrossAxisAlignment.start,
+        //     children: [
+        //       Text(
+        //         'Did you know?',
+        //         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+        //       ),
+        //       SizedBox(height: 8),
+        //       Text(
+        //         'PCOS is the most common hormonal disorder affecting women of reproductive age.',
+        //         style: TextStyle(fontSize: 14, color: Colors.black),
+        //       ),
+        //       SizedBox(height: 8),
+        //       Text(
+        //         'Haven\'t taken the PCOS screening test yet?',
+        //         style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
+        //       ),
+        //     ],
+        //   ),
+        // ),
         SizedBox(height: 16), // Add some space between the container and the button
 
         // Start Screening Button
