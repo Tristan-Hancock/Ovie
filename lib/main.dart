@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:ovie/pages/chat/chat_screen.dart';
 import 'package:ovie/pages/doctors/DoctorContact.dart';
+import 'package:ovie/pages/prescription/prescription_ui.dart';
 import 'widgets/bottom_navigation.dart';
 import 'widgets/background_gradient.dart';
 import 'pages/pcos/home_page.dart';
@@ -14,10 +15,10 @@ import 'pages/important_intro/intro_screen.dart';
 import 'pages/useraccount/Authpage.dart';
 import 'pages/useraccount/profile.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'widgets/top_bar.dart'; // Import the TopBar
-import 'services/objectbox.dart'; // Import ObjectBox service
+import 'widgets/top_bar.dart'; 
+import 'services/objectbox.dart'; 
 import 'package:ovie/objectbox.g.dart';
-
+ //Update UI and flow pending for into
 
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -28,14 +29,11 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  // Check if it's the first time the app is opened
   bool showIntro = await IntroCheck.isFirstTime();
   
-  // Initialize ObjectBox
   final objectBox = await ObjectBox.create(); // Initialize ObjectBox
 
   User? currentUser = FirebaseAuth.instance.currentUser;
@@ -43,21 +41,21 @@ void main() async {
   runApp(MyApp(
     showIntro: showIntro, 
     isLoggedIn: currentUser != null,
-    objectBox: objectBox, // Pass the ObjectBox instance to the app
+    objectBox: objectBox, 
   ));
 }
 
 class MyApp extends StatelessWidget {
   final bool showIntro;
   final bool isLoggedIn;
-  final ObjectBox objectBox; // Add ObjectBox to the app
+  final ObjectBox objectBox; 
 
   MyApp({required this.showIntro, required this.isLoggedIn, required this.objectBox});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Ovelia', // Update this to your desired app title
+      title: 'Ovelia', 
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -65,7 +63,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => AuthPage(),
         '/intro': (context) => IntroScreen(),
-        '/home': (context) => MainScreen(objectBox: objectBox), // Pass ObjectBox to MainScreen
+        '/home': (context) => MainScreen(objectBox: objectBox), 
         '/calendar': (context) => CalendarPage(objectBox: objectBox,),
         '/community': (context) => CommunityPage(),
         '/profile': (context) => ProfilePage(),
@@ -83,7 +81,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MainScreen extends StatefulWidget {
-  final ObjectBox objectBox; // Receive ObjectBox in MainScreen
+  final ObjectBox objectBox;
 
   MainScreen({required this.objectBox});
 
@@ -101,19 +99,19 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     
-    // Initialize the screen options with ObjectBox passed to each screen
     _widgetOptions = [
-      HomePage(objectBox: widget.objectBox), // Pass ObjectBox to HomePage
+      HomePage(objectBox: widget.objectBox), 
       CalendarPage(objectBox: widget.objectBox,),
       CommunityPage(),
-      DoctorContact(),
+      // DoctorContact(), //replacing with prescription scanner for now
+      PrescriptionReader(),
       ProfilePage(),
     ];
   }
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index; // This will handle valid index from navigation
+      _selectedIndex = index; 
     });
   }
 
@@ -121,11 +119,11 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: BackgroundGradient(
-        child: _widgetOptions.elementAt(_selectedIndex), // Select screen based on index
+        child: _widgetOptions.elementAt(_selectedIndex), 
       ),
       bottomNavigationBar: BottomNavigation(
         selectedIndex: _selectedIndex,
-        onItemTapped: _onItemTapped, // Update the index on tab change
+        onItemTapped: _onItemTapped, 
       ),
     );
   }

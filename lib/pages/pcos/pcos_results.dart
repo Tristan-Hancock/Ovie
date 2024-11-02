@@ -36,11 +36,7 @@ class PcosResultsPage extends StatelessWidget {
               height: 240, // Adjust height to match design
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFFBBBFFE), Color(0xFF101631)],
-                ),
+                color: Color(0xFFBBBFFE), // Removed the gradient, added solid color
               ),
               child: Center(
                 child: Column(
@@ -51,6 +47,7 @@ class PcosResultsPage extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 18,
                         color: Color(0xFFFDE7E7), // Text color matching the design
+                        
                       ),
                     ),
                     SizedBox(height: 10),
@@ -58,8 +55,9 @@ class PcosResultsPage extends StatelessWidget {
                       '75%', // Percentage value
                       style: TextStyle(
                         fontSize: 60, // Large font for percentage
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        fontWeight: FontWeight.w500, // FontWeight changed to 300
+                        fontFamily: 'Quicksand', // Changed the font to Quicksand
+                        color: Color(0xFF101631), // Updated color to 0xFF101631
                       ),
                     ),
                     SizedBox(height: 10),
