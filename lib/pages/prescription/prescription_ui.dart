@@ -3,8 +3,13 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'prescription_service.dart';
 import 'prescription_text_display.dart';
+import 'package:ovie/services/objectbox.dart';
 
 class PrescriptionReader extends StatefulWidget {
+  final ObjectBox objectBox;
+
+  const PrescriptionReader({Key? key, required this.objectBox}) : super(key: key);
+
   @override
   _PrescriptionReaderState createState() => _PrescriptionReaderState();
 }
@@ -47,7 +52,10 @@ class _PrescriptionReaderState extends State<PrescriptionReader> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PrescriptionTextDisplay(text: _extractedText),
+        builder: (context) => PrescriptionTextDisplay(
+          text: _extractedText,
+          objectBox: widget.objectBox, // Pass the ObjectBox instance
+        ),
       ),
     );
   }

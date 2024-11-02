@@ -18,8 +18,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'widgets/top_bar.dart'; 
 import 'services/objectbox.dart'; 
 import 'package:ovie/objectbox.g.dart';
- //Update UI and flow pending for into
-
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -32,30 +30,37 @@ void main() async {
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  bool showIntro = await IntroCheck.isFirstTime();
-  
-  final objectBox = await ObjectBox.create(); // Initialize ObjectBox
+  final showIntro = await IntroCheck.isFirstTime();
 
-  User? currentUser = FirebaseAuth.instance.currentUser;
+  // Initialize ObjectBox and log for debugging
+  final objectBox = await ObjectBox.create();
+  log('ObjectBox initialized successfully');
+
+  final currentUser = FirebaseAuth.instance.currentUser;
+  log('Current User: ${currentUser != null ? "Logged In" : "Not Logged In"}');
 
   runApp(MyApp(
     showIntro: showIntro, 
     isLoggedIn: currentUser != null,
-    objectBox: objectBox, 
+    objectBox: objectBox,
   ));
 }
 
 class MyApp extends StatelessWidget {
   final bool showIntro;
   final bool isLoggedIn;
-  final ObjectBox objectBox; 
+  final ObjectBox objectBox;
 
-  MyApp({required this.showIntro, required this.isLoggedIn, required this.objectBox});
+  MyApp({
+    required this.showIntro,
+    required this.isLoggedIn,
+    required this.objectBox,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Ovelia', 
+      title: 'Ovelia',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -63,8 +68,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => AuthPage(),
         '/intro': (context) => IntroScreen(),
-        '/home': (context) => MainScreen(objectBox: objectBox), 
-        '/calendar': (context) => CalendarPage(objectBox: objectBox,),
+        '/home': (context) => MainScreen(objectBox: objectBox),
+        '/calendar': (context) => CalendarPage(objectBox: objectBox),
         '/community': (context) => CommunityPage(),
         '/profile': (context) => ProfilePage(),
       },
@@ -98,20 +103,19 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    
+
     _widgetOptions = [
-      HomePage(objectBox: widget.objectBox), 
-      CalendarPage(objectBox: widget.objectBox,),
+      HomePage(objectBox: widget.objectBox),
+      CalendarPage(objectBox: widget.objectBox),
       CommunityPage(),
-      // DoctorContact(), //replacing with prescription scanner for now
-      PrescriptionReader(),
+      PrescriptionReader(objectBox: widget.objectBox), // Added objectBox for PrescriptionReader
       ProfilePage(),
     ];
   }
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index; 
+      _selectedIndex = index;
     });
   }
 
@@ -119,11 +123,11 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: BackgroundGradient(
-        child: _widgetOptions.elementAt(_selectedIndex), 
+        child: _widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigation(
         selectedIndex: _selectedIndex,
-        onItemTapped: _onItemTapped, 
+        onItemTapped: _onItemTapped,
       ),
     );
   }

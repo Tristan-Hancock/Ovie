@@ -124,6 +124,35 @@ final _entities = <obx_int.ModelEntity>[
             relationTarget: 'User')
       ],
       relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(4, 4436851435844874837),
+      name: 'Prescription',
+      lastPropertyId: const obx_int.IdUid(4, 161248815512566361),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 2277975934152980910),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 4777661131438470645),
+            name: 'title',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(3, 1104571044059952679),
+            name: 'extractedText',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(4, 161248815512566361),
+            name: 'scanDate',
+            type: 10,
+            flags: 0)
+      ],
+      relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[])
 ];
 
@@ -162,7 +191,7 @@ Future<obx.Store> openStore(
 obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
       entities: _entities,
-      lastEntityId: const obx_int.IdUid(3, 3085642789460672247),
+      lastEntityId: const obx_int.IdUid(4, 4436851435844874837),
       lastIndexId: const obx_int.IdUid(2, 4149379467928489541),
       lastRelationId: const obx_int.IdUid(0, 0),
       lastSequenceId: const obx_int.IdUid(0, 0),
@@ -294,6 +323,45 @@ obx_int.ModelDefinition getObjectBoxModel() {
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0);
           object.user.attach(store);
           return object;
+        }),
+    Prescription: obx_int.EntityDefinition<Prescription>(
+        model: _entities[3],
+        toOneRelations: (Prescription object) => [],
+        toManyRelations: (Prescription object) => {},
+        getId: (Prescription object) => object.id,
+        setId: (Prescription object, int id) {
+          object.id = id;
+        },
+        objectToFB: (Prescription object, fb.Builder fbb) {
+          final titleOffset = fbb.writeString(object.title);
+          final extractedTextOffset = fbb.writeString(object.extractedText);
+          fbb.startTable(5);
+          fbb.addInt64(0, object.id);
+          fbb.addOffset(1, titleOffset);
+          fbb.addOffset(2, extractedTextOffset);
+          fbb.addInt64(3, object.scanDate.millisecondsSinceEpoch);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+          final idParam =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+          final titleParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 6, '');
+          final extractedTextParam =
+              const fb.StringReader(asciiOptimization: true)
+                  .vTableGet(buffer, rootOffset, 8, '');
+          final scanDateParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0));
+          final object = Prescription(
+              id: idParam,
+              title: titleParam,
+              extractedText: extractedTextParam,
+              scanDate: scanDateParam);
+
+          return object;
         })
   };
 
@@ -366,4 +434,23 @@ class PeriodTracking_ {
   /// See [PeriodTracking.user].
   static final user =
       obx.QueryRelationToOne<PeriodTracking, User>(_entities[2].properties[3]);
+}
+
+/// [Prescription] entity fields to define ObjectBox queries.
+class Prescription_ {
+  /// See [Prescription.id].
+  static final id =
+      obx.QueryIntegerProperty<Prescription>(_entities[3].properties[0]);
+
+  /// See [Prescription.title].
+  static final title =
+      obx.QueryStringProperty<Prescription>(_entities[3].properties[1]);
+
+  /// See [Prescription.extractedText].
+  static final extractedText =
+      obx.QueryStringProperty<Prescription>(_entities[3].properties[2]);
+
+  /// See [Prescription.scanDate].
+  static final scanDate =
+      obx.QueryDateProperty<Prescription>(_entities[3].properties[3]);
 }

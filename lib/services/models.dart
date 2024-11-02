@@ -45,3 +45,19 @@ class PeriodTracking {
     required this.endDate,
   });
 }
+
+
+@Entity()
+class Prescription {
+  int id = 0; // ObjectBox will auto-increment this field
+  String title;
+  String extractedText;
+  DateTime scanDate;
+
+  Prescription({
+    this.id = 0,
+    required this.title,
+    required this.extractedText,
+    required this.scanDate,
+  });
+}

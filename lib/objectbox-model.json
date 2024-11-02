@@ -110,9 +110,38 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "4:4436851435844874837",
+      "lastPropertyId": "4:161248815512566361",
+      "name": "Prescription",
+      "properties": [
+        {
+          "id": "1:2277975934152980910",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:4777661131438470645",
+          "name": "title",
+          "type": 9
+        },
+        {
+          "id": "3:1104571044059952679",
+          "name": "extractedText",
+          "type": 9
+        },
+        {
+          "id": "4:161248815512566361",
+          "name": "scanDate",
+          "type": 10
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "3:3085642789460672247",
+  "lastEntityId": "4:4436851435844874837",
   "lastIndexId": "2:4149379467928489541",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
