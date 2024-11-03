@@ -4,6 +4,7 @@ import 'dart:io';
 import 'prescription_service.dart';
 import 'prescription_text_display.dart';
 import 'package:ovie/services/objectbox.dart';
+import 'package:ovie/services/models.dart'; // Import the model
 
 class PrescriptionReader extends StatefulWidget {
   final ObjectBox objectBox;
@@ -18,6 +19,19 @@ class _PrescriptionReaderState extends State<PrescriptionReader> {
   File? _selectedImage;
   String _extractedText = "Upload your prescriptions here to see the text.";
   bool _isImageUploaded = false;
+  List<Prescription> _savedPrescriptions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedPrescriptions(); // Load saved prescriptions on initialization
+  }
+
+  Future<void> _loadSavedPrescriptions() async {
+    setState(() {
+      _savedPrescriptions = widget.objectBox.getAllPrescriptions();
+    });
+  }
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -54,7 +68,19 @@ class _PrescriptionReaderState extends State<PrescriptionReader> {
       MaterialPageRoute(
         builder: (context) => PrescriptionTextDisplay(
           text: _extractedText,
-          objectBox: widget.objectBox, // Pass the ObjectBox instance
+          objectBox: widget.objectBox,
+        ),
+      ),
+    );
+  }
+
+  void _viewSavedPrescription(Prescription prescription) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PrescriptionTextDisplay(
+          text: prescription.extractedText,
+          objectBox: widget.objectBox,
         ),
       ),
     );
@@ -75,9 +101,9 @@ class _PrescriptionReaderState extends State<PrescriptionReader> {
           ),
         ),
       ),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
@@ -107,6 +133,35 @@ class _PrescriptionReaderState extends State<PrescriptionReader> {
                 ),
                 child: Text('Open Prescription'),
               ),
+            SizedBox(height: 30),
+            Text(
+              'Saved Prescriptions',
+              style: TextStyle(color: Colors.white, fontSize: 18),
+            ),
+            SizedBox(height: 10),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _savedPrescriptions.length,
+                itemBuilder: (context, index) {
+                  final prescription = _savedPrescriptions[index];
+                  return Card(
+                    color: Color(0xFF1A1E39),
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    child: ListTile(
+                      title: Text(
+                        prescription.title,
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      subtitle: Text(
+                        'Scanned on: ${prescription.scanDate}',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                      onTap: () => _viewSavedPrescription(prescription),
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
