@@ -13,8 +13,6 @@ class _AuthPageState extends State<AuthPage> {
   final AuthService _authService = AuthService();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _usernameController = TextEditingController();
   bool _isSignIn = true;
 
   @override
@@ -41,19 +39,17 @@ class _AuthPageState extends State<AuthPage> {
                 ),
                 SizedBox(height: 50),
 
-                // Form fields
-                if (!_isSignIn) ...[
-                  // Name field for sign-up
-                  _buildTextField(controller: _nameController, labelText: 'Name'),
-                  SizedBox(height: 10),
-                  _buildTextField(controller: _emailController, labelText: 'Email'),
-                  SizedBox(height: 10),
-                  _buildTextField(controller: _usernameController, labelText: 'Username'),
-                  SizedBox(height: 10),
-                ],
-                if (_isSignIn) _buildTextField(controller: _emailController, labelText: 'Username'),
+                // Email and Password fields
+                _buildTextField(
+                  controller: _emailController,
+                  labelText: 'Email',
+                ),
                 SizedBox(height: 10),
-                _buildTextField(controller: _passwordController, labelText: 'Password', obscureText: true),
+                _buildTextField(
+                  controller: _passwordController,
+                  labelText: 'Password',
+                  obscureText: true,
+                ),
                 SizedBox(height: 20),
 
                 // Action button
@@ -63,7 +59,9 @@ class _AuthPageState extends State<AuthPage> {
                     backgroundColor: Color(0xFFBBBFFE),
                     padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                     textStyle: TextStyle(fontSize: 18),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                   child: Text(_isSignIn ? 'Login' : 'Sign Up'),
                 ),
@@ -73,7 +71,9 @@ class _AuthPageState extends State<AuthPage> {
                 TextButton(
                   onPressed: () => setState(() => _isSignIn = !_isSignIn),
                   child: Text(
-                    _isSignIn ? 'Don\'t have an account? Sign up' : 'Have an account? Sign in',
+                    _isSignIn
+                        ? 'Don\'t have an account? Sign up'
+                        : 'Have an account? Sign in',
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
@@ -81,7 +81,7 @@ class _AuthPageState extends State<AuthPage> {
                 // Forgot Password link for Sign-In only
                 if (_isSignIn)
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {}, // Add forgot password logic here if needed
                     child: Text(
                       'Forgot password?',
                       style: TextStyle(color: Colors.white),
@@ -126,6 +126,7 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 
+  // Sign in method
   Future<void> _signIn() async {
     User? user = await _authService.signInWithEmail(
       _emailController.text.trim(),
@@ -137,15 +138,24 @@ class _AuthPageState extends State<AuthPage> {
     }
   }
 
+  // Sign up method
   Future<void> _signUp() async {
     User? user = await _authService.signUpWithEmail(
       _emailController.text.trim(),
       _passwordController.text.trim(),
-      _usernameController.text.trim(),
+      _emailController.text.trim(),
     );
+
     if (user != null) {
-      bool showIntro = await IntroCheck.isFirstTime();
-      Navigator.pushReplacementNamed(context, showIntro ? '/intro' : '/home');
+      // Show a confirmation message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Sign up successful! Please log in.")),
+      );
+
+      // Redirect to login screen
+      setState(() {
+        _isSignIn = true; // Toggle to the login view
+      });
     }
   }
 }
