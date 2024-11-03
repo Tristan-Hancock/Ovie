@@ -6,7 +6,6 @@ import 'package:ovie/pages/chat/chat_screen.dart';
 import 'package:ovie/pages/doctors/DoctorContact.dart';
 import 'package:ovie/pages/prescription/prescription_ui.dart';
 import 'widgets/bottom_navigation.dart';
-import 'widgets/background_gradient.dart';
 import 'pages/pcos/home_page.dart';
 import 'pages/calendar/calendar_page.dart';
 import 'pages/communityscreen/communityfeed.dart';
@@ -15,7 +14,6 @@ import 'pages/important_intro/intro_screen.dart';
 import 'pages/useraccount/Authpage.dart';
 import 'pages/useraccount/profile.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'widgets/top_bar.dart'; 
 import 'services/objectbox.dart'; 
 import 'package:ovie/objectbox.g.dart';
 
@@ -118,17 +116,16 @@ class _MainScreenState extends State<MainScreen> {
       _selectedIndex = index;
     });
   }
+  
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: _widgetOptions.elementAt(_selectedIndex), // Directly use _widgetOptions without BackgroundGradient
+    bottomNavigationBar: BottomNavigation(
+      selectedIndex: _selectedIndex,
+      onItemTapped: _onItemTapped,
+    ),
+  );
+}
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: BackgroundGradient(
-        child: _widgetOptions.elementAt(_selectedIndex),
-      ),
-      bottomNavigationBar: BottomNavigation(
-        selectedIndex: _selectedIndex,
-        onItemTapped: _onItemTapped,
-      ),
-    );
-  }
 }
