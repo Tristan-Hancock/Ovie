@@ -1,3 +1,19 @@
+buildscript {
+    ext.kotlin_version = '2.0.20' // Add this line or update the existing one with the latest version
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "com.android.tools.build:gradle:7.0.0" // or your version
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version" // Add this line
+        classpath 'com.google.gms:google-services:4.3.10' // Keep your existing lines
+    }
+}
+
+
+
 plugins {
     id "com.android.application"
     id "kotlin-android"
@@ -24,8 +40,8 @@ if (flutterVersionName == null) {
 }
 
 android {
+    compileSdkVersion 34
     namespace "com.example.ovie"
-    compileSdk flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -65,4 +81,14 @@ flutter {
     source '../..'
 }
 
-dependencies {}
+dependencies {
+    // Firebase BOM to manage dependencies
+    // implementation platform('com.google.firebase:firebase-bom:32.0.0')
+
+    // ML Kit dependency
+    implementation 'com.google.mlkit:digital-ink-recognition:17.0.2'
+    implementation 'com.google.mlkit:text-recognition:16.0.0'
+
+}
+
+
