@@ -1,6 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart'; // For reverse geocoding
+import 'package:ovie/services/geolocation.dart'; // Import the GeolocationService
 
-class DoctorContact extends StatelessWidget {
+class DoctorContact extends StatefulWidget {
+  @override
+  _DoctorContactState createState() => _DoctorContactState();
+}
+
+class _DoctorContactState extends State<DoctorContact> {
+  final GeolocationService _geolocationService = GeolocationService();
+  String _currentCity = 'Fetching location...';
+
   final List<Map<String, String>> doctors = [
     {
       'name': 'Dr. Ophelia M.D.',
@@ -17,14 +27,49 @@ class DoctorContact extends StatelessWidget {
       'address': '456 Broadway, New York City, NY',
       'phone': '0987654321',
     },
-    // Add more doctors as needed
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _getLocationAndCity();
+  }
+
+  Future<void> _getLocationAndCity() async {
+    // Fetch the current location
+    final position = await _geolocationService.getCurrentLocation();
+
+    if (position != null) {
+      // Use reverse geocoding to get the city name
+      try {
+        List<Placemark> placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
+        if (placemarks.isNotEmpty) {
+          setState(() {
+            _currentCity = placemarks[0].locality ?? 'Unknown city';
+          });
+        }
+      } catch (e) {
+        print('Error occurred while getting city: $e');
+        setState(() {
+          _currentCity = 'Unable to fetch city';
+        });
+      }
+    } else {
+      setState(() {
+        _currentCity = 'Location services disabled';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFF101631), // Dark background color
+        backgroundColor: Color(0xFF101631),
+        automaticallyImplyLeading: false, 
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -36,7 +81,7 @@ class DoctorContact extends StatelessWidget {
               ),
             ),
             Text(
-              'New York City',
+              _currentCity, // Display the fetched city name
               style: TextStyle(
                 color: Colors.white70,
                 fontSize: 12,

@@ -1,45 +1,66 @@
 import 'dart:developer';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:ovie/pages/chat/chat_screen.dart';
 import 'package:ovie/pages/doctors/DoctorContact.dart';
+import 'package:ovie/pages/prescription/prescription_ui.dart';
 import 'widgets/bottom_navigation.dart';
 import 'widgets/background_gradient.dart';
-import 'pages/home_page.dart';
-import 'pages/calendar_page.dart';
+import 'pages/pcos/home_page.dart';
+import 'pages/calendar/calendar_page.dart';
 import 'pages/communityscreen/communityfeed.dart';
 import 'pages/important_intro/intro_check.dart';
 import 'pages/important_intro/intro_screen.dart';
 import 'pages/useraccount/Authpage.dart';
 import 'pages/useraccount/profile.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'widgets/top_bar.dart'; // Import the TopBar
+import 'widgets/top_bar.dart'; 
+import 'services/objectbox.dart'; 
+import 'package:ovie/objectbox.g.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   print('Handling a background message: ${message.messageId}');
 }
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  bool showIntro = await IntroCheck.isFirstTime(); // Check if it's the first time
+
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  User? currentUser = FirebaseAuth.instance.currentUser;
-runApp(MyApp(showIntro: showIntro, isLoggedIn: currentUser !=null));
+
+  final showIntro = await IntroCheck.isFirstTime();
+
+  // Initialize ObjectBox and log for debugging
+  final objectBox = await ObjectBox.create();
+  log('ObjectBox initialized successfully');
+
+  final currentUser = FirebaseAuth.instance.currentUser;
+  log('Current User: ${currentUser != null ? "Logged In" : "Not Logged In"}');
+
+  runApp(MyApp(
+    showIntro: showIntro, 
+    isLoggedIn: currentUser != null,
+    objectBox: objectBox,
+  ));
 }
 
 class MyApp extends StatelessWidget {
   final bool showIntro;
   final bool isLoggedIn;
+  final ObjectBox objectBox;
 
-  MyApp({required this.showIntro, required this.isLoggedIn});
+  MyApp({
+    required this.showIntro,
+    required this.isLoggedIn,
+    required this.objectBox,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Ovelia', // Update this to your desired app title
+      title: 'Ovelia',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -47,8 +68,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => AuthPage(),
         '/intro': (context) => IntroScreen(),
-        '/home': (context) => MainScreen(),
-        '/calendar': (context) => CalendarPage(),
+        '/home': (context) => MainScreen(objectBox: objectBox),
+        '/calendar': (context) => CalendarPage(objectBox: objectBox),
         '/community': (context) => CommunityPage(),
         '/profile': (context) => ProfilePage(),
       },
@@ -65,6 +86,10 @@ class MyApp extends StatelessWidget {
 }
 
 class MainScreen extends StatefulWidget {
+  final ObjectBox objectBox;
+
+  MainScreen({required this.objectBox});
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -73,17 +98,24 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
   // List of screens for the navigation bar
-  final List<Widget> _widgetOptions = [
-    HomePage(),
-    CalendarPage(),
-    CommunityPage(),
-    DoctorContact(),
-    ProfilePage(),  // Ensure ProfilePage is in this list
-  ];
+  late List<Widget> _widgetOptions;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _widgetOptions = [
+      HomePage(objectBox: widget.objectBox),
+      CalendarPage(objectBox: widget.objectBox),
+      CommunityPage(),
+      PrescriptionReader(objectBox: widget.objectBox), // Added objectBox for PrescriptionReader
+      ProfilePage(),
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;  // This will handle valid index from navigation
+      _selectedIndex = index;
     });
   }
 
@@ -91,11 +123,11 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: BackgroundGradient(
-        child: _widgetOptions.elementAt(_selectedIndex), // Select screen based on index
+        child: _widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigation(
         selectedIndex: _selectedIndex,
-        onItemTapped: _onItemTapped, // Update the index on tab change
+        onItemTapped: _onItemTapped,
       ),
     );
   }
