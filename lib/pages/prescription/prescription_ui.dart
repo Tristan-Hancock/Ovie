@@ -4,7 +4,7 @@ import 'dart:io';
 import 'prescription_service.dart';
 import 'prescription_text_display.dart';
 import 'package:ovie/services/objectbox.dart';
-import 'package:ovie/services/models.dart'; // Import the model
+import 'package:ovie/services/models.dart';
 
 class PrescriptionReader extends StatefulWidget {
   final ObjectBox objectBox;
@@ -69,9 +69,14 @@ class _PrescriptionReaderState extends State<PrescriptionReader> {
         builder: (context) => PrescriptionTextDisplay(
           text: _extractedText,
           objectBox: widget.objectBox,
+          onSaved: _onPrescriptionSaved, // Pass the callback function
         ),
       ),
     );
+  }
+
+  void _onPrescriptionSaved() {
+    _loadSavedPrescriptions(); // Refresh the list when a prescription is saved
   }
 
   void _viewSavedPrescription(Prescription prescription) {
@@ -81,6 +86,7 @@ class _PrescriptionReaderState extends State<PrescriptionReader> {
         builder: (context) => PrescriptionTextDisplay(
           text: prescription.extractedText,
           objectBox: widget.objectBox,
+          onSaved: _onPrescriptionSaved, // Ensure onSaved is passed here if required
         ),
       ),
     );

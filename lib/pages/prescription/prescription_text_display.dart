@@ -5,21 +5,20 @@ import '../../services/objectbox.dart';
 class PrescriptionTextDisplay extends StatelessWidget {
   final String text;
   final ObjectBox objectBox;
+  final VoidCallback onSaved;
 
-  const PrescriptionTextDisplay({Key? key, required this.text, required this.objectBox}) : super(key: key);
+  const PrescriptionTextDisplay({Key? key, required this.text, required this.objectBox, required this.onSaved}) : super(key: key);
 
   void _savePrescription(BuildContext context, String title) {
-    // Create a new Prescription entity with the entered title and extracted text
     final prescription = Prescription(
       title: title,
-      extractedText: text, // Use 'extractedText' instead of 'content'
+      extractedText: text,
       scanDate: DateTime.now(),
     );
 
-    // Save the prescription to ObjectBox
     objectBox.savePrescription(prescription);
+    onSaved(); // Trigger the callback to refresh the list
 
-    // Confirmation feedback
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("Prescription saved successfully!")),
     );
@@ -41,7 +40,7 @@ class PrescriptionTextDisplay extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop(); // Close the dialog
+              Navigator.of(context).pop();
             },
             child: Text("Cancel"),
           ),
@@ -49,10 +48,9 @@ class PrescriptionTextDisplay extends StatelessWidget {
             onPressed: () {
               final title = titleController.text.trim();
               if (title.isNotEmpty) {
-                Navigator.of(context).pop(); // Close the dialog
-                _savePrescription(context, title); // Save with entered title
+                Navigator.of(context).pop();
+                _savePrescription(context, title);
               } else {
-                // Show an error if title is empty
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text("Title cannot be empty!")),
                 );
