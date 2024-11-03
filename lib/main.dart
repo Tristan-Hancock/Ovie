@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ovie/pages/chat/chat_screen.dart';
 import 'package:ovie/pages/doctors/DoctorContact.dart';
 import 'package:ovie/pages/prescription/prescription_ui.dart';
@@ -14,7 +15,7 @@ import 'pages/important_intro/intro_screen.dart';
 import 'pages/useraccount/Authpage.dart';
 import 'pages/useraccount/profile.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'services/objectbox.dart'; 
+import 'services/objectbox.dart';
 import 'package:ovie/objectbox.g.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -38,7 +39,7 @@ void main() async {
   log('Current User: ${currentUser != null ? "Logged In" : "Not Logged In"}');
 
   runApp(MyApp(
-    showIntro: showIntro, 
+    showIntro: showIntro,
     isLoggedIn: currentUser != null,
     objectBox: objectBox,
   ));
@@ -60,7 +61,15 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Ovelia',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: Color(0xFF101631), // Main background color
+      textTheme: GoogleFonts.quicksandTextTheme(
+  Theme.of(context).textTheme.copyWith(
+    displayLarge: TextStyle(fontSize: 50, fontWeight: FontWeight.w600, color: Colors.white), // Replaces headline1
+    bodyLarge: TextStyle(fontSize: 16, color: Colors.white), // Replaces bodyText1
+    bodyMedium: TextStyle(fontSize: 14, color: Colors.white70), // Replaces bodyText2
+  ),
+),
+
       ),
       initialRoute: _initialRoute(),
       routes: {
@@ -106,7 +115,7 @@ class _MainScreenState extends State<MainScreen> {
       HomePage(objectBox: widget.objectBox),
       CalendarPage(objectBox: widget.objectBox),
       CommunityPage(),
-      PrescriptionReader(objectBox: widget.objectBox), // Added objectBox for PrescriptionReader
+      PrescriptionReader(objectBox: widget.objectBox),
       ProfilePage(),
     ];
   }
@@ -116,16 +125,15 @@ class _MainScreenState extends State<MainScreen> {
       _selectedIndex = index;
     });
   }
-  
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    body: _widgetOptions.elementAt(_selectedIndex), // Directly use _widgetOptions without BackgroundGradient
-    bottomNavigationBar: BottomNavigation(
-      selectedIndex: _selectedIndex,
-      onItemTapped: _onItemTapped,
-    ),
-  );
-}
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _widgetOptions.elementAt(_selectedIndex),
+      bottomNavigationBar: BottomNavigation(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
+      ),
+    );
+  }
 }
