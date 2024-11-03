@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ovie/widgets/background_gradient.dart';
 import 'package:ovie/pages/communityscreen/create_posts.dart';
 import 'community_comments.dart';
 
@@ -14,7 +13,8 @@ class CommunityPostsOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
-      child: BackgroundGradient(
+      child: Container(
+        color: Color(0xFF101631),
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
