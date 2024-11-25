@@ -126,17 +126,27 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 
-  // Sign in method
-  Future<void> _signIn() async {
-    User? user = await _authService.signInWithEmail(
-      _emailController.text.trim(),
-      _passwordController.text.trim(),
-    );
-    if (user != null) {
-      bool showIntro = await IntroCheck.isFirstTime();
-      Navigator.pushReplacementNamed(context, showIntro ? '/intro' : '/home');
-    }
+  // Sign in method add back when we need get started screen
+  // Future<void> _signIn() async {
+  //   User? user = await _authService.signInWithEmail(
+  //     _emailController.text.trim(),
+  //     _passwordController.text.trim(),
+  //   );
+  //   if (user != null) {
+  //     bool showIntro = await IntroCheck.isFirstTime();
+  //     Navigator.pushReplacementNamed(context, showIntro ? '/intro' : '/home');
+  //   }
+  // }
+Future<void> _signIn() async {
+  User? user = await _authService.signInWithEmail(
+    _emailController.text.trim(),
+    _passwordController.text.trim(),
+  );
+  if (user != null) {
+    // Removed the IntroCheck logic as it is no longer required
+    Navigator.pushReplacementNamed(context, '/home');
   }
+}
 
   // Sign up method
   Future<void> _signUp() async {
