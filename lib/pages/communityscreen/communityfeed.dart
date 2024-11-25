@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ovie/widgets/background_gradient.dart';
 import 'package:ovie/pages/chat/chat_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -286,7 +285,8 @@ Widget _buildMainContent() {
     builder: (context, child) {
       return Transform.translate(
         offset: Offset(250 * _animationController.value, 0),
-        child: BackgroundGradient(
+        child: Container(
+          color: Color(0xFF101631), // Set solid background color
           child: Scaffold(
             backgroundColor: Colors.transparent,
             appBar: PreferredSize(
@@ -387,10 +387,13 @@ Widget _buildMainContent() {
             floatingActionButton: FloatingActionButton(
               onPressed: _showAddPostDialog,  // Use the function already written
               backgroundColor: Color(0xFFF4608B),  // Use the pink color from the Figma
-              child: Icon(
-                Icons.add,  // Plus icon for creating a new post
-                color: Colors.white,
-                size: 30,  // Match the Figma size (adjust if needed)
+              child: Text(
+                'Write',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             floatingActionButtonLocation: FloatingActionButtonLocation.endFloat, // Positioned at the bottom-right
