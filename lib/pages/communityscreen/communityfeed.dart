@@ -147,6 +147,7 @@ void _showAddPostDialog() {
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                   ),
+                  style: TextStyle(color: Colors.black),
                 ),
                 SizedBox(height: 16),
 
@@ -162,6 +163,7 @@ void _showAddPostDialog() {
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                   ),
+                  style: TextStyle(color: Colors.black),
                 ),
                 SizedBox(height: 16),
 
@@ -176,6 +178,7 @@ void _showAddPostDialog() {
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                   ),
+                  style: TextStyle(color: Colors.black),
                 ),
                 SizedBox(height: 16),
 
