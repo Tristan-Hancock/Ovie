@@ -1,4 +1,4 @@
-package com.example.ovie
+package com.ovelia.app;
 
 import io.flutter.embedding.android.FlutterActivity
 
