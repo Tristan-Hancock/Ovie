@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ovie/pages/pcos/logging.dart';
+import 'package:ovie/pages/pcos/screening_test.dart'; // Import Screening Test Page
 import 'package:ovie/services/objectbox.dart';
 
 class HomePage extends StatefulWidget {
@@ -54,22 +55,23 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start, // Align greeting to the left
               children: [
-                // Row for Icon and Ovelia Title
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween, // Align icon left, title center
+                Stack(
+                  alignment: Alignment.center, // Center the Ovelia title
                   children: [
                     // Icon on the left
-                    Image.asset(
-                      'assets/icons/ovelia.png', // Icon for Ovelia
-                      width: 47, // Icon width
-                      height: 47, // Icon height
-                      fit: BoxFit.contain,
+                    Positioned(
+                      left: 0,
+                      child: Image.asset(
+                        'assets/icons/ovelia.png', // Icon for Ovelia
+                        width: 47, // Icon width
+                        height: 47, // Icon height
+                        fit: BoxFit.contain,
+                      ),
                     ),
-                    // Ovelia title in the center
-                    Expanded(
+                    // Center the Ovelia title
+                    Center(
                       child: Text(
                         'Ovelia',
-                        textAlign: TextAlign.center, // Center the title text
                         style: TextStyle(
                           fontSize: screenHeight * 0.03,
                           fontWeight: FontWeight.bold,
@@ -113,6 +115,37 @@ class _HomePageState extends State<HomePage> {
               children: [
                 // Daily Logging Section
                 LoggingSection(objectBox: widget.objectBox),
+                const SizedBox(height: 24), // Space between logging and button
+                // Start Screening Button
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ScreeningTestPage(), // Navigate to Screening Test
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFBBBFFE), // Button color
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0), // Rounded corners
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.2,
+                        vertical: screenHeight * 0.02,
+                      ), // Adjust padding
+                    ),
+                    child: Text(
+                      'Start Screening',
+                      style: TextStyle(
+                        fontSize: screenHeight * 0.02,
+                        color: const Color(0xFF090909), // Text color
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
