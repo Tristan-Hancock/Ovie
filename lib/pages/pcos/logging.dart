@@ -18,14 +18,10 @@ class LoggingSection extends StatefulWidget {
 }
 
 class _LoggingSectionState extends State<LoggingSection> {
-  bool _isMenstruationChecked = false;
-  bool _isCrampsChecked = false;
-  bool _isAcneChecked = false;
-  bool _isHeadachesChecked = false;
   String _selectedEmotion = 'Smiling';
   String? _imagePath;
   final ImagePicker _picker = ImagePicker();
-  final TextEditingController _textLogController = TextEditingController(); // Added controller
+  final TextEditingController _textLogController = TextEditingController();
 
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.camera);
@@ -37,43 +33,41 @@ class _LoggingSectionState extends State<LoggingSection> {
   }
 
   void _logForToday() {
-    String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-    // Create a new DailyLog instance with the textlog field
-    DailyLog log = DailyLog(
-      date: currentDate,
-      isMenstruation: _isMenstruationChecked,
-      isCramps: _isCrampsChecked,
-      isAcne: _isAcneChecked,
-      isHeadaches: _isHeadachesChecked,
-      emotion: _selectedEmotion,
-      imagePath: _imagePath,
-      textlog: _textLogController.text, // Include the user's notes
-    );
+  DailyLog log = DailyLog(
+    date: currentDate,
+    emotion: _selectedEmotion,
+    imagePath: _imagePath,
+    textlog: _textLogController.text,
+    isMenstruation: false, // Default or user-provided value
+    isCramps: false,       // Default or user-provided value
+    isAcne: false,         // Default or user-provided value
+    isHeadaches: false,    // Default or user-provided value
+  );
 
-    // Get or create the user
-    var user = widget.objectBox.userBox
-            .query(User_.userId.equals(
-                FirebaseAuthUser.FirebaseAuth.instance.currentUser!.uid))
-            .build()
-            .findFirst() ??
-        UserModel.User(
-            userId: FirebaseAuthUser.FirebaseAuth.instance.currentUser!.uid);
+  var user = widget.objectBox.userBox
+          .query(User_.userId.equals(
+              FirebaseAuthUser.FirebaseAuth.instance.currentUser!.uid))
+          .build()
+          .findFirst() ??
+      UserModel.User(
+          userId: FirebaseAuthUser.FirebaseAuth.instance.currentUser!.uid);
 
-    if (user.id == 0) {
-      widget.objectBox.userBox.put(user);
-    }
-
-    log.user.target = user; // Link the log to the user
-    widget.objectBox.dailyLogBox.put(log); // Save the log
-
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Log for $currentDate saved successfully!'),
-    ));
-
-    // Clear the text input after saving
-    _textLogController.clear();
+  if (user.id == 0) {
+    widget.objectBox.userBox.put(user);
   }
+
+  log.user.target = user;
+  widget.objectBox.dailyLogBox.put(log);
+
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content: Text('Log for $currentDate saved successfully!'),
+  ));
+
+  _textLogController.clear();
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +80,6 @@ class _LoggingSectionState extends State<LoggingSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title
           Text(
             'Today',
             style: const TextStyle(
@@ -96,15 +89,13 @@ class _LoggingSectionState extends State<LoggingSection> {
             ),
           ),
           const SizedBox(height: 16.0),
-
-          // Emotions Section
           Row(
             children: [
               Text(
                 'Log your emotions',
                 style: const TextStyle(color: Colors.white, fontSize: 16),
               ),
-              const Spacer(),
+              Spacer(),
               Text(
                 'Capture your day',
                 style: const TextStyle(color: Colors.white, fontSize: 16),
@@ -113,59 +104,58 @@ class _LoggingSectionState extends State<LoggingSection> {
           ),
           const SizedBox(height: 8.0),
           Row(
-            children: [
-              // Emotions Section
-              Expanded(
-                flex: 3,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildEmotionIcon('Smiling', '😊'),
-                      _buildEmotionIcon('Neutral', '😐'),
-                      _buildEmotionIcon('Frowning', '☹️'),
-                      _buildEmotionIcon('Pouting', '😡'),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(width: 8.0),
-
-              // Selfie Section
-              Expanded(
-                flex: 1,
-                child: GestureDetector(
-                  onTap: _pickImage,
-                  child: Container(
-                    width: 80.0,
-                    height: 80.0,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2A3557),
-                      borderRadius: BorderRadius.circular(12.0),
-                      border: Border.all(color: Colors.grey),
-                    ),
-                    child: _imagePath == null
-                        ? Center(
-                            child: Icon(Icons.camera_alt, color: Colors.grey),
-                          )
-                        : ClipRRect(
-                            borderRadius: BorderRadius.circular(12.0),
-                            child: Image.file(
-                              File(_imagePath!),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                  ),
-                ),
-              ),
-            ],
+  children: [
+    Expanded(
+      flex: 3,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start, // Remove spaceBetween
+          children: [
+            _buildEmotionIcon('Smiling', 'assets/icons/smiling.png'),
+            SizedBox(width: 8), // Add spacing between icons
+            _buildEmotionIcon('Neutral', 'assets/icons/neutral.png'),
+            SizedBox(width: 8),
+            _buildEmotionIcon('Frowning', 'assets/icons/frowning.png'),
+            SizedBox(width: 8),
+            _buildEmotionIcon('Pouting', 'assets/icons/pouting.png'),
+          ],
+        ),
+      ),
+    ),
+    const SizedBox(width: 8.0),
+    Expanded(
+      flex: 1,
+      child: GestureDetector(
+        onTap: _pickImage,
+        child: Container(
+          width: 80.0,
+          height: 80.0,
+          decoration: BoxDecoration(
+            color: const Color(0xFF2A3557),
+            borderRadius: BorderRadius.circular(12.0),
+            border: Border.all(color: Colors.grey),
           ),
-          const SizedBox(height: 16.0),
+          child: _imagePath == null
+              ? Center(
+                  child: Icon(Icons.camera_alt, color: Colors.grey),
+                )
+              : ClipRRect(
+                  borderRadius: BorderRadius.circular(12.0),
+                  child: Image.file(
+                    File(_imagePath!),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+        ),
+      ),
+    ),
+  ],
+),
 
-          // Notes Section
+          const SizedBox(height: 16.0),
           TextField(
-            controller: _textLogController, // Attach the controller
+            controller: _textLogController,
             maxLines: 3,
             decoration: InputDecoration(
               hintText: 'Write your thoughts...',
@@ -180,8 +170,6 @@ class _LoggingSectionState extends State<LoggingSection> {
             style: TextStyle(color: Colors.white),
           ),
           const SizedBox(height: 16.0),
-
-          // Save Button
           Center(
             child: ElevatedButton(
               onPressed: _logForToday,
@@ -203,7 +191,7 @@ class _LoggingSectionState extends State<LoggingSection> {
     );
   }
 
-  Widget _buildEmotionIcon(String label, String emoji) {
+  Widget _buildEmotionIcon(String label, String assetPath) {
     bool isSelected = _selectedEmotion == label;
     return GestureDetector(
       onTap: () {
@@ -218,12 +206,10 @@ class _LoggingSectionState extends State<LoggingSection> {
           color: isSelected ? const Color(0xFFBBBFFE) : Colors.grey[800],
         ),
         padding: const EdgeInsets.all(8.0),
-        child: Text(
-          emoji,
-          style: TextStyle(
-            fontSize: 24,
-            color: isSelected ? Colors.black : Colors.white,
-          ),
+        child: Image.asset(
+          assetPath,
+          width: 36,
+          height: 36,
         ),
       ),
     );
