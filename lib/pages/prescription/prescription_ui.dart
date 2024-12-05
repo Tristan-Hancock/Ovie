@@ -62,35 +62,41 @@ class _PrescriptionReaderState extends State<PrescriptionReader> {
     }
   }
 
-  void _openPrescription() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PrescriptionTextDisplay(
-          text: _extractedText,
-          objectBox: widget.objectBox,
-          onSaved: _onPrescriptionSaved, // Pass the callback function
+ void _openPrescription() {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => PrescriptionTextDisplay(
+        objectBox: widget.objectBox,
+        onSaved: _onPrescriptionSaved,
+        existingPrescription: Prescription(
+          title: "", // Default title for a new prescription
+          extractedText: _extractedText, // Pass extracted text
+          scanDate: DateTime.now(),
         ),
+        isEditing: true, // Enable editing for new prescription
       ),
-    );
-  }
+    ),
+  );
+}
 
   void _onPrescriptionSaved() {
     _loadSavedPrescriptions(); // Refresh the list when a prescription is saved
   }
 
   void _viewSavedPrescription(Prescription prescription) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PrescriptionTextDisplay(
-          text: prescription.extractedText,
-          objectBox: widget.objectBox,
-          onSaved: _onPrescriptionSaved, // Ensure onSaved is passed here if required
-        ),
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => PrescriptionTextDisplay(
+        objectBox: widget.objectBox,
+        onSaved: _onPrescriptionSaved,
+        existingPrescription: prescription, // Pass the existing prescription
+        isEditing: false, // View mode by default
       ),
-    );
-  }
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -162,7 +168,7 @@ class _PrescriptionReaderState extends State<PrescriptionReader> {
                         'Scanned on: ${prescription.scanDate}',
                         style: TextStyle(color: Colors.white70),
                       ),
-                      onTap: () => _viewSavedPrescription(prescription),
+                      onTap: () => _viewSavedPrescription(prescription), // View or edit prescription
                     ),
                   );
                 },
