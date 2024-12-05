@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ovie/pages/pcos/logging.dart';
-import 'package:ovie/pages/pcos/screening_test.dart';
 import 'package:ovie/services/objectbox.dart';
 
 class HomePage extends StatefulWidget {
@@ -42,23 +41,69 @@ class _HomePageState extends State<HomePage> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF101631),
-      appBar: AppBar(
-  backgroundColor: const Color(0xFFBBBFFE),
-  elevation: 0,
-  centerTitle: true, // Ensures the title is centered
-  automaticallyImplyLeading: false, // Removes the default back button
-  title: Text(
-    'Ovelia',
-    style: TextStyle(
-      fontSize: 20,
-      fontWeight: FontWeight.bold,
-      color: Colors.black,
-      fontFamily: 'Quicksand',
-    ),
-  ),
-),
-
+      backgroundColor: const Color(0xFF101631), // Dark navy background
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(screenHeight * 0.18), // Adjust AppBar height
+        child: Container(
+          color: const Color(0xFFBBBFFE), // Lavender background
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: screenWidth * 0.05,
+              vertical: screenHeight * 0.02,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start, // Align greeting to the left
+              children: [
+                // Row for Icon and Ovelia Title
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween, // Align icon left, title center
+                  children: [
+                    // Icon on the left
+                    Image.asset(
+                      'assets/icons/ovelia.png', // Icon for Ovelia
+                      width: 47, // Icon width
+                      height: 47, // Icon height
+                      fit: BoxFit.contain,
+                    ),
+                    // Ovelia title in the center
+                    Expanded(
+                      child: Text(
+                        'Ovelia',
+                        textAlign: TextAlign.center, // Center the title text
+                        style: TextStyle(
+                          fontSize: screenHeight * 0.03,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          fontFamily: 'Quicksand',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16), // Spacing between title and greeting
+                // Greeting Section
+                Text(
+                  'Hi $_username!',
+                  style: TextStyle(
+                    fontSize: screenHeight * 0.035,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black, // Black for contrast
+                    fontFamily: 'Quicksand',
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "Your PCOS journey starts here. Let's go!",
+                  style: TextStyle(
+                    fontSize: screenHeight * 0.02,
+                    color: Colors.black87, // Slightly lighter black
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -66,75 +111,7 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 16),
-                // Greeting Section (Username and Subtitle)
-                FutureBuilder<DocumentSnapshot>(
-                  future: FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(FirebaseAuth.instance.currentUser!.uid)
-                      .get(),
-                  builder: (context, snapshot) {
-                    String greetingText = 'Hi User!';
-                    String subtitleText = "Your journey starts here. Let's go!";
-                    if (snapshot.hasData && snapshot.data!.exists) {
-                      Map<String, dynamic>? userData =
-                          snapshot.data!.data() as Map<String, dynamic>?;
-                      greetingText = 'Hi ${userData?['username'] ?? 'User'}!';
-                    }
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          greetingText,
-                          style: TextStyle(
-                            fontSize: screenHeight * 0.03,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            fontFamily: 'Quicksand',
-                          ),
-                        ),
-                        Text(
-                          subtitleText,
-                          style: TextStyle(
-                            fontSize: screenHeight * 0.02,
-                            color: Colors.white70,
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-                const SizedBox(height: 24),
-                // Start Screening Button
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => ScreeningTestPage()),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFBBBFFE),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.0), // Rounded corners
-                      ),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: screenWidth * 0.2,
-                        vertical: screenHeight * 0.02,
-                      ), // Adjust padding
-                    ),
-                    child: Text(
-                      'Start Screening',
-                      style: TextStyle(
-                        fontSize: screenHeight * 0.02,
-                        color: const Color(0xFF090909),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // Logging Section
+                // Daily Logging Section
                 LoggingSection(objectBox: widget.objectBox),
               ],
             ),
