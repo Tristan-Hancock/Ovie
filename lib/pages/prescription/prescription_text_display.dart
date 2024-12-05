@@ -21,52 +21,54 @@ class PrescriptionTextDisplayDialog extends StatefulWidget {
       _PrescriptionTextDisplayDialogState();
 }
 
-class _PrescriptionTextDisplayDialogState
-    extends State<PrescriptionTextDisplayDialog> {
+class _PrescriptionTextDisplayDialogState extends State<PrescriptionTextDisplayDialog> {
   late TextEditingController _titleController;
+  late TextEditingController _frequencyController;
   late TextEditingController _textController;
 
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(
-        text: widget.existingPrescription?.title ?? 'New Prescription');
-    _textController =
-        TextEditingController(text: widget.existingPrescription?.extractedText ?? widget.extractedText);
+    _titleController = TextEditingController();
+    _frequencyController = TextEditingController();
+    _textController = TextEditingController(text: widget.extractedText);
   }
 
   @override
   void dispose() {
     _titleController.dispose();
+    _frequencyController.dispose();
     _textController.dispose();
     super.dispose();
   }
 
   void _savePrescription() {
     final title = _titleController.text.trim();
-    final text = _textController.text.trim();
+    final frequency = _frequencyController.text.trim();
+    final extractedText = _textController.text.trim();
 
-    if (title.isEmpty || text.isEmpty) {
+    if (title.isEmpty || extractedText.isEmpty || frequency.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Title and text cannot be empty!")),
+        const SnackBar(content: Text("All fields are required!")),
       );
       return;
     }
 
     final prescription = Prescription(
-      id: widget.existingPrescription?.id ?? 0,
       title: title,
-      extractedText: text,
+      extractedText: extractedText,
       scanDate: DateTime.now(),
+      frequency: frequency,
     );
 
-    widget.objectBox.prescriptionBox.put(prescription); // Save to ObjectBox
-    widget.onSaved(); // Callback to update the list
+    widget.objectBox.prescriptionBox.put(prescription); // Save prescription to ObjectBox
+    widget.onSaved(); // Refresh the list in PrescriptionReader
 
-    Navigator.of(context).pop(); // Close dialog
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Prescription saved successfully!")),
     );
+
+    Navigator.of(context).pop(); // Close the dialog
   }
 
   @override
@@ -79,6 +81,7 @@ class _PrescriptionTextDisplayDialogState
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Title Input
             TextField(
               controller: _titleController,
               decoration: InputDecoration(
@@ -93,9 +96,27 @@ class _PrescriptionTextDisplayDialogState
               style: const TextStyle(color: Colors.white),
             ),
             const SizedBox(height: 16),
+
+            // Frequency Input
+            TextField(
+              controller: _frequencyController,
+              decoration: InputDecoration(
+                labelText: "Frequency (e.g., 2 times a day)",
+                labelStyle: const TextStyle(color: Colors.white70),
+                filled: true,
+                fillColor: const Color(0xFF101631),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              style: const TextStyle(color: Colors.white),
+            ),
+            const SizedBox(height: 16),
+
+            // Extracted Text Input
             TextField(
               controller: _textController,
-              maxLines: 5,
+              maxLines: null,
               decoration: InputDecoration(
                 labelText: "Prescription Text",
                 labelStyle: const TextStyle(color: Colors.white70),
@@ -108,12 +129,20 @@ class _PrescriptionTextDisplayDialogState
               style: const TextStyle(color: Colors.white),
             ),
             const SizedBox(height: 16),
+
+            // Save Button
             ElevatedButton(
               onPressed: _savePrescription,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFBBBFFE),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              child: const Text('Save'),
+              child: const Text(
+                "Save",
+                style: TextStyle(color: Colors.black),
+              ),
             ),
           ],
         ),
@@ -121,3 +150,4 @@ class _PrescriptionTextDisplayDialogState
     );
   }
 }
+

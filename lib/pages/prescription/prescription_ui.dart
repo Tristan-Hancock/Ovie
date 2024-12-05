@@ -62,18 +62,50 @@ class _PrescriptionReaderState extends State<PrescriptionReader> {
     }
   }
 
-  void _showPrescriptionDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return PrescriptionTextDisplayDialog(
-          objectBox: widget.objectBox,
-          extractedText: _extractedText,
-          onSaved: _loadSavedPrescriptions,
-        );
-      },
-    );
-  }
+void _showPrescriptionDialog() {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return PrescriptionTextDisplayDialog(
+        objectBox: widget.objectBox,
+        extractedText: _extractedText,
+        onSaved: _loadSavedPrescriptions,
+      );
+    },
+  );
+}
+
+void _deletePrescription(Prescription prescription) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Delete Prescription'),
+      content: const Text('Are you sure you want to delete this prescription?'),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(); // Close dialog
+          },
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            widget.objectBox.prescriptionBox.remove(prescription.id);
+            _loadSavedPrescriptions(); // Refresh the list
+            Navigator.of(context).pop(); // Close dialog
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Prescription deleted successfully!'),
+            ));
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFBBBFFE),
+          ),
+          child: const Text('Delete', style: TextStyle(color: Colors.black)),
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -116,7 +148,7 @@ class _PrescriptionReaderState extends State<PrescriptionReader> {
               style: TextStyle(color: Colors.white, fontSize: 18),
             ),
             const SizedBox(height: 10),
-            Expanded(
+  Expanded(
   child: ListView.builder(
     itemCount: _savedPrescriptions.length,
     itemBuilder: (context, index) {
@@ -125,13 +157,35 @@ class _PrescriptionReaderState extends State<PrescriptionReader> {
         color: const Color(0xFF1A1E39),
         margin: const EdgeInsets.symmetric(vertical: 8),
         child: ListTile(
+          contentPadding: const EdgeInsets.all(16.0),
           title: Text(
             prescription.title,
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Colors.white,
+            ),
           ),
           subtitle: Text(
-            'Scanned on: ${prescription.scanDate}',
-            style: const TextStyle(color: Colors.white70),
+            prescription.frequency ?? "No frequency set",
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.white70,
+            ),
+          ),
+          trailing: PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Colors.white),
+            onSelected: (value) {
+              if (value == 'delete') {
+                _deletePrescription(prescription);
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'delete',
+                child: Text('Delete'),
+              ),
+            ],
           ),
           onTap: () {
             Navigator.push(
@@ -149,6 +203,10 @@ class _PrescriptionReaderState extends State<PrescriptionReader> {
     },
   ),
 ),
+
+
+
+
 
           ],
         ),
@@ -176,4 +234,19 @@ class _PrescriptionReaderState extends State<PrescriptionReader> {
       ),
     );
   }
+
+  Widget _buildScheduleTimeButton(String time) {
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    decoration: BoxDecoration(
+      color: const Color(0xFFBBBFFE),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Text(
+      time,
+      style: const TextStyle(color: Colors.black, fontSize: 14),
+    ),
+  );
+}
+
 }
