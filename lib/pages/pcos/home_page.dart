@@ -6,8 +6,8 @@ import 'package:ovie/pages/pcos/screening_test.dart';
 import 'package:ovie/services/objectbox.dart';
 
 class HomePage extends StatefulWidget {
-  final ObjectBox objectBox; // ObjectBox instance
-  
+  final ObjectBox objectBox;
+
   HomePage({required this.objectBox});
 
   @override
@@ -42,41 +42,32 @@ class _HomePageState extends State<HomePage> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: Color(0xFF101631), // Dark background color
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(screenHeight * 0.15), // Adjust height dynamically
-        child: AppBar(
-          backgroundColor: Color(0xFFBBBFFE), // AppBar background color
-          elevation: 0,
-          automaticallyImplyLeading: false,
-          flexibleSpace: Padding(
-            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05), // Responsive padding
+      backgroundColor: const Color(0xFF101631),
+      appBar: AppBar(
+  backgroundColor: const Color(0xFFBBBFFE),
+  elevation: 0,
+  centerTitle: true, // Ensures the title is centered
+  automaticallyImplyLeading: false, // Removes the default back button
+  title: Text(
+    'Ovelia',
+    style: TextStyle(
+      fontSize: 20,
+      fontWeight: FontWeight.bold,
+      color: Colors.black,
+      fontFamily: 'Quicksand',
+    ),
+  ),
+),
+
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(screenWidth * 0.05), // Responsive padding
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Logo
-                Row(
-                  children: [
-                    Image.asset(
-                      'assets/icons/ovelia2.png', // Logo asset
-                      height: screenHeight * 0.05, // Adjust size dynamically
-                      width: screenHeight * 0.05,
-                    ),
-                    SizedBox(width: screenWidth * 0.02),
-                    Text(
-                      'Ovelia',
-                      style: TextStyle(
-                        fontSize: screenHeight * 0.025,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
-                        fontFamily: 'Quicksand',
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: screenHeight * 0.02), // Responsive spacing
-                // Greeting text
+                const SizedBox(height: 16),
+                // Greeting Section (Username and Subtitle)
                 FutureBuilder<DocumentSnapshot>(
                   future: FirebaseFirestore.instance
                       .collection('users')
@@ -98,7 +89,7 @@ class _HomePageState extends State<HomePage> {
                           style: TextStyle(
                             fontSize: screenHeight * 0.03,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color: Colors.white,
                             fontFamily: 'Quicksand',
                           ),
                         ),
@@ -106,57 +97,47 @@ class _HomePageState extends State<HomePage> {
                           subtitleText,
                           style: TextStyle(
                             fontSize: screenHeight * 0.02,
-                            color: Colors.black54,
+                            color: Colors.white70,
                           ),
                         ),
                       ],
                     );
                   },
                 ),
-              ],
-            ),
-          ),
-        ),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(screenWidth * 0.05), // Responsive padding
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: screenHeight * 0.02),
-              // Start Screening Button
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ScreeningTestPage()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFBBBFFE), // Button color
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.0), // Rounded corners
+                const SizedBox(height: 24),
+                // Start Screening Button
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ScreeningTestPage()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFBBBFFE),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0), // Rounded corners
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.2,
+                        vertical: screenHeight * 0.02,
+                      ), // Adjust padding
                     ),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.2,
-                      vertical: screenHeight * 0.02,
-                    ), // Adjust padding
-                  ),
-                  child: Text(
-                    'Start Screening',
-                    style: TextStyle(
-                      fontSize: screenHeight * 0.02,
-                      color: Color(0xFF090909),
+                    child: Text(
+                      'Start Screening',
+                      style: TextStyle(
+                        fontSize: screenHeight * 0.02,
+                        color: const Color(0xFF090909),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(height: screenHeight * 0.03),
-              // Logging Section
-              LoggingSection(objectBox: widget.objectBox),
-            ],
+                const SizedBox(height: 24),
+                // Logging Section
+                LoggingSection(objectBox: widget.objectBox),
+              ],
+            ),
           ),
         ),
       ),
