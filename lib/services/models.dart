@@ -19,6 +19,7 @@ class DailyLog {
   String emotion; // Smiling, Neutral, Frowning, Pouting
   String? imagePath; // Local path of the saved image
   final user = ToOne<User>(); // Link to User
+  String? textlog;
 
   DailyLog({
     this.id = 0,
@@ -28,6 +29,7 @@ class DailyLog {
     required this.isAcne,
     required this.isHeadaches,
     required this.emotion,
+    this.textlog,
     this.imagePath,
   });
 }

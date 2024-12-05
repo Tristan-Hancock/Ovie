@@ -7,7 +7,7 @@ import 'package:ovie/objectbox.g.dart';
 import 'package:ovie/services/models.dart' as UserModel;
 import 'package:ovie/services/objectbox.dart';
 import 'package:ovie/services/models.dart';
-import 'dart:math';
+
 class LoggingSection extends StatefulWidget {
   final ObjectBox objectBox;
 
@@ -25,9 +25,10 @@ class _LoggingSectionState extends State<LoggingSection> {
   String _selectedEmotion = 'Smiling';
   String? _imagePath;
   final ImagePicker _picker = ImagePicker();
+  final TextEditingController _textLogController = TextEditingController(); // Added controller
 
   Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    final pickedFile = await _picker.pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
       setState(() {
         _imagePath = pickedFile.path;
@@ -35,213 +36,10 @@ class _LoggingSectionState extends State<LoggingSection> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final maxWidth = constraints.maxWidth;
-        final isSmallScreen = maxWidth < 360;
-        
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Title Section
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Today\'s log',
-                    style: TextStyle(
-                      fontSize: isSmallScreen ? 14 : 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.filter_alt_outlined, color: Colors.white),
-                    onPressed: () {},
-                    constraints: BoxConstraints.tightFor(width: 40, height: 40),
-                  ),
-                ],
-              ),
-            ),
-
-            // Checkboxes Section
-            Wrap(
-              spacing: 4,
-              runSpacing: 0,
-              children: [
-                _buildCheckbox('Menstruation', _isMenstruationChecked, (val) {
-                  setState(() => _isMenstruationChecked = val!);
-                }, maxWidth),
-                _buildCheckbox('Cramps', _isCrampsChecked, (val) {
-                  setState(() => _isCrampsChecked = val!);
-                }, maxWidth),
-                _buildCheckbox('Acne', _isAcneChecked, (val) {
-                  setState(() => _isAcneChecked = val!);
-                }, maxWidth),
-                _buildCheckbox('Headaches', _isHeadachesChecked, (val) {
-                  setState(() => _isHeadachesChecked = val!);
-                }, maxWidth),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // Emotion Section
-            Text(
-              'I feel',
-              style: TextStyle(
-                fontSize: isSmallScreen ? 16 : 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            
-            const SizedBox(height: 12),
-
-            // Emotions Wrap
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildEmotionIcon('Smiling', 'assets/icons/smiling.png'),
-                  _buildEmotionIcon('Neutral', 'assets/icons/neutral.png'),
-                  _buildEmotionIcon('Frowning', 'assets/icons/frowning.png'),
-                  _buildEmotionIcon('Pouting', 'assets/icons/pouting.png'),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Selfie Section
-            Center(
-              child: Column(
-                children: [
-                  _buildCaptureSelfie(
-                    min(maxWidth * 0.9, 300),
-                    min(maxWidth * 0.9, 300),
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: min(maxWidth * 0.9, 200),
-                    child: ElevatedButton(
-                      onPressed: _logForToday,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFBBBFFE),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      child: const Text('Log for Today'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildCheckbox(String title, bool value, Function(bool?) onChanged, double maxWidth) {
-    return SizedBox(
-      width: maxWidth < 400 ? maxWidth / 2 - 4 : maxWidth / 2 - 8,
-      child: CheckboxListTile(
-        title: Text(
-          title,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: maxWidth < 360 ? 12 : 14,
-          ),
-        ),
-        value: value,
-        onChanged: onChanged,
-        activeColor: Colors.pinkAccent,
-        checkColor: Colors.white,
-        controlAffinity: ListTileControlAffinity.leading,
-        contentPadding: EdgeInsets.zero,
-        dense: true,
-      ),
-    );
-  }
-
-  Widget _buildEmotionIcon(String label, String assetPath) {
-    bool isSelected = _selectedEmotion == label;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            _selectedEmotion = label;
-          });
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: isSelected
-                ? Border.all(color: const Color(0xFFBBBFFE), width: 3)
-                : null,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(2.0),
-            child: Image.asset(
-              assetPath,
-              width: 40,
-              height: 40,
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCaptureSelfie(double width, double height) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey, width: 1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: _pickImage,
-          borderRadius: BorderRadius.circular(12),
-          child: _imagePath == null
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(Icons.camera_alt_outlined,
-                        size: 40, color: Colors.grey),
-                    SizedBox(height: 8),
-                    Text(
-                      'Capture your day.\nUpload a selfie!',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 14, color: Colors.white),
-                    ),
-                  ],
-                )
-              : ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.file(
-                    File(_imagePath!),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-        ),
-      ),
-    );
-  }
-
   void _logForToday() {
     String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
+    // Create a new DailyLog instance with the textlog field
     DailyLog log = DailyLog(
       date: currentDate,
       isMenstruation: _isMenstruationChecked,
@@ -250,8 +48,10 @@ class _LoggingSectionState extends State<LoggingSection> {
       isHeadaches: _isHeadachesChecked,
       emotion: _selectedEmotion,
       imagePath: _imagePath,
+      textlog: _textLogController.text, // Include the user's notes
     );
 
+    // Get or create the user
     var user = widget.objectBox.userBox
             .query(User_.userId.equals(
                 FirebaseAuthUser.FirebaseAuth.instance.currentUser!.uid))
@@ -264,11 +64,168 @@ class _LoggingSectionState extends State<LoggingSection> {
       widget.objectBox.userBox.put(user);
     }
 
-    log.user.target = user;
-    widget.objectBox.dailyLogBox.put(log);
+    log.user.target = user; // Link the log to the user
+    widget.objectBox.dailyLogBox.put(log); // Save the log
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text('Log for $currentDate saved successfully!'),
     ));
+
+    // Clear the text input after saving
+    _textLogController.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E2749),
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Title
+          Text(
+            'Today',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 16.0),
+
+          // Emotions Section
+          Row(
+            children: [
+              Text(
+                'Log your emotions',
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              const Spacer(),
+              Text(
+                'Capture your day',
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8.0),
+          Row(
+            children: [
+              // Emotions Section
+              Expanded(
+                flex: 3,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildEmotionIcon('Smiling', '😊'),
+                      _buildEmotionIcon('Neutral', '😐'),
+                      _buildEmotionIcon('Frowning', '☹️'),
+                      _buildEmotionIcon('Pouting', '😡'),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 8.0),
+
+              // Selfie Section
+              Expanded(
+                flex: 1,
+                child: GestureDetector(
+                  onTap: _pickImage,
+                  child: Container(
+                    width: 80.0,
+                    height: 80.0,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2A3557),
+                      borderRadius: BorderRadius.circular(12.0),
+                      border: Border.all(color: Colors.grey),
+                    ),
+                    child: _imagePath == null
+                        ? Center(
+                            child: Icon(Icons.camera_alt, color: Colors.grey),
+                          )
+                        : ClipRRect(
+                            borderRadius: BorderRadius.circular(12.0),
+                            child: Image.file(
+                              File(_imagePath!),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16.0),
+
+          // Notes Section
+          TextField(
+            controller: _textLogController, // Attach the controller
+            maxLines: 3,
+            decoration: InputDecoration(
+              hintText: 'Write your thoughts...',
+              hintStyle: TextStyle(color: Colors.white54),
+              filled: true,
+              fillColor: const Color(0xFF2A3557),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: BorderSide.none,
+              ),
+            ),
+            style: TextStyle(color: Colors.white),
+          ),
+          const SizedBox(height: 16.0),
+
+          // Save Button
+          Center(
+            child: ElevatedButton(
+              onPressed: _logForToday,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFBBBFFE),
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              child: const Text(
+                'Save Log',
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmotionIcon(String label, String emoji) {
+    bool isSelected = _selectedEmotion == label;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedEmotion = label;
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8.0),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: isSelected ? const Color(0xFFBBBFFE) : Colors.grey[800],
+        ),
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          emoji,
+          style: TextStyle(
+            fontSize: 24,
+            color: isSelected ? Colors.black : Colors.white,
+          ),
+        ),
+      ),
+    );
   }
 }
