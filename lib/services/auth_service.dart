@@ -44,26 +44,27 @@ Future<void> joinCommunity(String communityId) async {
   }
   Future<User?> signUpWithEmail(String email, String password, String username) async {
     try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      User? user = userCredential.user;
+        UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+        User? user = userCredential.user;
 
-      // Create user profile
-      if (user != null) {
-        await users.doc(user.uid).set({
-          'username': username,
-          'email': email,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
-      }
-      return user;
+        // Create user profile with username
+        if (user != null) {
+            await users.doc(user.uid).set({
+                'username': username, // Include the username field
+                'email': email,
+                'createdAt': FieldValue.serverTimestamp(), // Timestamp for when the user was created
+            });
+        }
+        return user;
     } catch (e) {
-      print(e.toString());
-      return null;
+        print("Error during sign-up: ${e.toString()}");
+        return null;
     }
-  }
+}
+
 
   Future<User?> signInWithEmail(String email, String password) async {
     try {
