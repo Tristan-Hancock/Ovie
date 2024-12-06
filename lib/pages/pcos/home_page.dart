@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ovie/pages/pcos/logging.dart';
-import 'package:ovie/pages/pcos/screening_test.dart'; // Import Screening Test Page
+import 'package:ovie/pages/pcos/medication.dart';
+import 'package:ovie/pages/pcos/screening_test.dart';
 import 'package:ovie/services/objectbox.dart';
 
 class HomePage extends StatefulWidget {
@@ -115,7 +116,19 @@ class _HomePageState extends State<HomePage> {
               children: [
                 // Daily Logging Section
                 LoggingSection(objectBox: widget.objectBox),
-                const SizedBox(height: 24), // Space between logging and button
+                const SizedBox(height: 24), // Space between logging and medications
+                const Text(
+                  "Track Your Medications",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Add the MedicationSection here
+                MedicationSection(objectBox: widget.objectBox),
+                const SizedBox(height: 24), // Space between medications and button
                 // Start Screening Button
                 Center(
                   child: ElevatedButton(
