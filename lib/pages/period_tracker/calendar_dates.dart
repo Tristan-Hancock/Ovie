@@ -106,12 +106,28 @@ class _CalendarDatesState extends State<CalendarDates> {
   }
 
   // Function to show log details when a date with a log is clicked
-  void _showLogDetailsForDate(DateTime date) {
-    final log = dailyReport?.getLogForDate(date, dailyLogs);
-    if (log != null) {
-      dailyReport?.showLogDetails(context, log);
-    }
+void _showLogDetailsForDate(DateTime date) {
+  final log = dailyReport?.getLogForDate(date, dailyLogs);
+
+  if (log != null) {
+    // Retrieve the required data for the additional arguments
+    final DateTime lastPeriodStartDate = savedPeriods.isNotEmpty
+        ? savedPeriods.last.startDate
+        : DateTime.now(); // Fallback if no period data exists
+    final int cycleLength = 28; // Default or configurable cycle length
+    final int periodDuration = 5; // Default or configurable period duration
+
+    // Call the updated `showLogDetails` method with all arguments
+    dailyReport?.showLogDetails(
+      context,
+      log,
+      lastPeriodStartDate,
+      cycleLength,
+      periodDuration,
+    );
   }
+}
+
 
 
 

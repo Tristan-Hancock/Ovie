@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:ovie/services/models.dart' as ObjectBoxModel; // Prefix for ObjectBox's User
 import 'package:ovie/objectbox.g.dart'; // Import the ObjectBox generated code
 import 'package:ovie/services/objectbox.dart';
-
+import 'cycle_phase.dart';
 class DailyReport {
   final ObjectBox objectBox; // ObjectBox instance to fetch data
 
@@ -34,15 +34,26 @@ class DailyReport {
   }
 
   // Function to show a modal bottom sheet with log details for a specific date
-void showLogDetails(BuildContext context, ObjectBoxModel.DailyLog log) {
+void showLogDetails(
+  BuildContext context,
+  ObjectBoxModel.DailyLog log,
+  DateTime lastPeriodStartDate,
+  int cycleLength,
+  int periodDuration,
+) {
+  // Calculate Cycle Day and Phase
+  int daysSinceLastPeriod = DateTime.parse(log.date).difference(lastPeriodStartDate).inDays;
+  int cycleDay = (daysSinceLastPeriod % cycleLength) + 1;
+  String phase = determineCyclePhase(cycleDay, periodDuration);
+
   showModalBottomSheet(
     context: context,
     builder: (context) {
       return Container(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Color(0xFFBBBFFE), // Match the Figma background color
-          borderRadius: BorderRadius.only(
+          color: const Color.fromARGB(255, 164, 169, 249),
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
           ),
@@ -50,35 +61,37 @@ void showLogDetails(BuildContext context, ObjectBoxModel.DailyLog log) {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Left Column: Large image and log details
+            // Left Column: Symptoms and Image
             Expanded(
               flex: 1,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Date on top left
+                  // Date and Symptoms Section
                   Text(
-                    '${DateFormat('d MMMM').format(DateTime.parse(log.date))}', // Date formatting
-                    style: TextStyle(
+                    'Today ${DateFormat('d MMMM').format(DateTime.parse(log.date))}',
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                       color: Colors.black,
                     ),
                   ),
-                  SizedBox(height: 10),
-                  
-                  // Symptoms list under the date
-                  Text('Menstruation: ${log.isMenstruation ? "Yes" : "No"}'),
-                  Text('Cramps: ${log.isCramps ? "Yes" : "No"}'),
-                  Text('Acne: ${log.isAcne ? "Yes" : "No"}'),
-                  Text('Headaches: ${log.isHeadaches ? "Yes" : "No"}'),
-                  
-                  SizedBox(height: 20), // Space between text and image
+                  const SizedBox(height: 8),
+                  if (log.isMenstruation) const Text('Menstruation', style: TextStyle(color: Colors.black)),
+                  if (log.isCramps) const Text('Cramps', style: TextStyle(color: Colors.black)),
+                  if (log.isAcne) const Text('Acne', style: TextStyle(color: Colors.black)),
+                  if (log.isHeadaches) const Text('Headaches', style: TextStyle(color: Colors.black)),
+                  if (!log.isMenstruation &&
+                      !log.isCramps &&
+                      !log.isAcne &&
+                      !log.isHeadaches)
+                    const Text('No symptoms logged', style: TextStyle(color: Colors.black)),
+                  const SizedBox(height: 16),
 
-                  // Large image section below the details
+                  // Image Section
                   if (log.imagePath != null)
                     Container(
-                      height: 250, // Larger height to emphasize the image
+                      height: 250,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         image: DecorationImage(
@@ -92,46 +105,47 @@ void showLogDetails(BuildContext context, ObjectBoxModel.DailyLog log) {
                       height: 250,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
-                        color: Colors.grey[300], // Placeholder color if no image
+                        color: Colors.grey[300],
                       ),
-                      child: Icon(Icons.image, size: 100, color: Colors.grey[700]), // Placeholder icon
+                      child:  Icon(Icons.image, size: 100, color: Colors.grey[700]),
                     ),
                 ],
               ),
             ),
 
-            SizedBox(width: 20), // Space between the two columns
+            const SizedBox(width: 16),
 
-            // Right Column: Progression circle placeholder, "I'm feeling" and "I'm thinking"
+            // Right Column: Menstrual Phase and Emotions
             Expanded(
               flex: 1,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Placeholder for the progression circle
-                  Container(
-                    height: 100, // Adjust height for the placeholder
-                    width: 100,  // Adjust width for the placeholder
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.grey[300]!),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Cycle Phase',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 14,
+                  // Menstrual Phase Progress Circle
+                  Center(
+                    child: SizedBox(
+                      height: 100,
+                      width: 100,
+                      child: CustomPaint(
+                        painter: CyclePhasePainter(cycleDay, cycleLength),
+                        child: Center(
+                          child: Text(
+                            phase,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  SizedBox(height: 20), // Space between progression circle and sections
+                  const SizedBox(height: 16),
 
-                  // "I'm feeling" Section
-                  Text(
+                  // "I'm Feeling" Section
+                  const Text(
                     "I'm feeling",
                     style: TextStyle(
                       fontSize: 16,
@@ -139,29 +153,54 @@ void showLogDetails(BuildContext context, ObjectBoxModel.DailyLog log) {
                       color: Colors.black,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Container(
-                    padding: EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: Colors.grey[300]!),
                     ),
                     child: Center(
-                      child: Text(
-                        log.emotion,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
-                        ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+  // Display emotion image (if available) based on the emotion
+  if (log.emotion == 'Happy')
+    Image.asset(
+      'assets/icons/smiling.png',
+      height: 24,
+      width: 24,
+    ),
+  if (log.emotion == 'Neutral')
+    Image.asset(
+      'assets/icons/neutral.png',
+      height: 24,
+      width: 24,
+    ),
+  if (log.emotion == 'Sad')
+    Image.asset(
+      'assets/icons/frowning.png',
+      height: 24,
+      width: 24,
+    ),
+  if (log.emotion == 'Angry')
+    Image.asset(
+      'assets/icons/pouting.png',
+      height: 24,
+      width: 24,
+    ),
+  const SizedBox(width: 8),
+  
+],
+
                       ),
                     ),
                   ),
+                  const SizedBox(height: 16),
 
-                  SizedBox(height: 20), // Space between sections
-
-                  // "I'm thinking" Section
-                  Text(
+                  // "I'm Thinking" Section
+                  const Text(
                     "I'm thinking",
                     style: TextStyle(
                       fontSize: 16,
@@ -169,9 +208,9 @@ void showLogDetails(BuildContext context, ObjectBoxModel.DailyLog log) {
                       color: Colors.black,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Container(
-                    padding: EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8),
@@ -179,11 +218,8 @@ void showLogDetails(BuildContext context, ObjectBoxModel.DailyLog log) {
                     ),
                     child: Center(
                       child: Text(
-                        log.imagePath != null ? "Felt really good today" : "No data available",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
-                        ),
+                        log.textlog ?? "No data available",
+                        style: const TextStyle(fontSize: 16, color: Colors.black),
                       ),
                     ),
                   ),
@@ -200,6 +236,29 @@ void showLogDetails(BuildContext context, ObjectBoxModel.DailyLog log) {
 
 
 
+String _formatSymptoms(ObjectBoxModel.DailyLog log) {
+  List<String> symptoms = [];
+  if (log.isMenstruation) symptoms.add("Menstruation");
+  if (log.isCramps) symptoms.add("Cramps");
+  if (log.isAcne) symptoms.add("Acne");
+  if (log.isHeadaches) symptoms.add("Headaches");
+
+  return symptoms.isNotEmpty ? symptoms.join(", ") : "No symptoms logged";
+}
+
+
+
+String determineCyclePhase(int cycleDay, int periodDuration) {
+  if (cycleDay <= periodDuration) {
+    return "Menstrual Phase";
+  } else if (cycleDay <= 14) {
+    return "Follicular Phase";
+  } else if (cycleDay == 14) {
+    return "Ovulatory Phase";
+  } else {
+    return "Luteal Phase";
+  }
+}
   // Function to fetch all the daily logs from ObjectBox
   Future<List<ObjectBoxModel.DailyLog>> fetchDailyLogs(ObjectBoxModel.User user) async {
     return objectBox.dailyLogBox.query(DailyLog_.user.equals(user.id)).build().find();

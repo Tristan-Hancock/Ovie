@@ -8,7 +8,7 @@ import 'package:ovie/pages/doctors/DoctorContact.dart';
 import 'package:ovie/pages/prescription/prescription_ui.dart';
 import 'widgets/bottom_navigation.dart';
 import 'pages/pcos/home_page.dart';
-import 'pages/calendar/calendar_page.dart';
+import 'pages/period_tracker/calendar_page.dart';
 import 'pages/communityscreen/communityfeed.dart';
 import 'pages/useraccount/Authpage.dart';
 import 'pages/useraccount/profile.dart';
