@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ovie/pages/pcos/logging.dart';
-import 'package:ovie/pages/pcos/medication.dart';
+import 'package:ovie/widgets/home_widgets/DailyLogging/logging.dart';
+import 'package:ovie/widgets/home_widgets/MedicationTracker/medication.dart';
 import 'package:ovie/pages/pcos/screening_test.dart';
 import 'package:ovie/services/objectbox.dart';
 

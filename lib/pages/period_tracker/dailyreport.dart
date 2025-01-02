@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:ovie/services/models.dart' as ObjectBoxModel; // Prefix for ObjectBox's User
 import 'package:ovie/objectbox.g.dart'; // Import the ObjectBox generated code
 import 'package:ovie/services/objectbox.dart';
-import 'cycle_phase.dart';
+import '../../widgets/PeriodCycle/cycle_phase.dart';
 class DailyReport {
   final ObjectBox objectBox; // ObjectBox instance to fetch data
 
