@@ -5,7 +5,7 @@ import 'package:ovie/widgets/home_widgets/DailyLogging/logging.dart';
 import 'package:ovie/widgets/home_widgets/MedicationTracker/medication.dart';
 import 'package:ovie/pages/pcos/screening_test.dart';
 import 'package:ovie/services/objectbox.dart';
-
+import 'package:ovie/widgets/home_widgets/period_tracker/tracker_widget.dart';
 class HomePage extends StatefulWidget {
   final ObjectBox objectBox;
 
@@ -124,12 +124,17 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           const SizedBox(height: 16.0),
-
-
-
-
-
                 LoggingSection(objectBox: widget.objectBox),
+                const SizedBox(height: 16.0,),
+                Text(
+            'Track your cycle',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+                TrackerWidget(objectBox: widget.objectBox), 
                 const SizedBox(height: 24), // Space between logging and medications
                 const Text(
                   "Track Your Medications",
