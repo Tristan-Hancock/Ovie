@@ -115,6 +115,20 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Daily Logging Section
+                          Text(
+            'Today',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 16.0),
+
+
+
+
+
                 LoggingSection(objectBox: widget.objectBox),
                 const SizedBox(height: 24), // Space between logging and medications
                 const Text(

@@ -65,113 +65,174 @@ class _LoggingSectionState extends State<LoggingSection> {
     content: Text('Log for $currentDate saved successfully!'),
   ));
 
-  _textLogController.clear();
 }
 
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E2749),
-        borderRadius: BorderRadius.circular(16.0),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Today',
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 16.0),
-  Row(
-  children: [
-    Expanded(
-      flex: 3,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            _buildEmotionIcon('Smiling', 'assets/icons/smiling.png'),
-            const SizedBox(width: 12), // Add consistent spacing
-            _buildEmotionIcon('Neutral', 'assets/icons/neutral.png'),
-            const SizedBox(width: 12),
-            _buildEmotionIcon('Frowning', 'assets/icons/frowning.png'),
-            const SizedBox(width: 12),
-            _buildEmotionIcon('Pouting', 'assets/icons/pouting.png'),
-          ],
-        ),
-      ),
+ @override
+Widget build(BuildContext context) {
+  return Container(
+    padding: const EdgeInsets.all(16.0),
+    decoration: BoxDecoration(
+      color: const Color(0xFF1E2749),
+      borderRadius: BorderRadius.circular(16.0),
     ),
-    const SizedBox(width: 16), // Increase spacing between icons and camera
-    GestureDetector(
-      onTap: _pickImage,
-      child: Container(
-        width: 60.0, // Reduced width
-        height: 60.0, // Reduced height
-        decoration: BoxDecoration(
-          color: const Color(0xFF2A3557),
-          borderRadius: BorderRadius.circular(12.0),
-          border: Border.all(color: Colors.grey),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Left Column: Emotions and Text Input
+        Expanded(
+          flex: 3,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // "Log your emotions" Text
+              Text(
+                'Log your emotions',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white70,
+                ),
+              ),
+              const SizedBox(height: 8.0),
+
+              // Emotion Icons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  _buildEmotionIcon('Smiling', 'assets/icons/smiling.png'),
+                  const SizedBox(width: 12),
+                  _buildEmotionIcon('Neutral', 'assets/icons/neutral.png'),
+                  const SizedBox(width: 12),
+                  _buildEmotionIcon('Frowning', 'assets/icons/frowning.png'),
+                  const SizedBox(width: 12),
+                  _buildEmotionIcon('Pouting', 'assets/icons/pouting.png'),
+                ],
+              ),
+              const SizedBox(height: 16.0),
+
+              // "Write your thoughts" Text Box
+              TextField(
+                controller: _textLogController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: 'Write your thoughts...',
+                  hintStyle: TextStyle(color: Colors.white54),
+                  filled: true,
+                  fillColor: const Color(0xFF2A3557),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                style: TextStyle(color: Colors.white),
+              ),
+
+              const SizedBox(height: 16.0),
+
+              // Save Log Button
+              Center(
+                child: ElevatedButton(
+                  onPressed: _logForToday,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFBBBFFE),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  child: const Text(
+                    'Save Log',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-        child: _imagePath == null
-            ? const Icon(Icons.camera_alt, color: Colors.grey, size: 28) // Adjusted icon size
-            : ClipRRect(
+
+        const SizedBox(width: 16.0), // Spacing between columns
+
+        // Right Column: Image Capture
+        Expanded(
+          flex: 2,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // "Capture your day" Text
+              Text(
+                'Capture your day.\nUpload a selfie!',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white70,
+                ),
+              ),
+              const SizedBox(height: 16.0),
+
+              // Image Picker
+              GestureDetector(
+  onTap: _pickImage,
+  child: Container(
+    width: 200.0,
+    height: 250.0,
+    decoration: BoxDecoration(
+      color: const Color(0xFF2A3557),
+      borderRadius: BorderRadius.circular(12.0),
+      border: Border.all(color: Colors.grey),
+    ),
+    child: _imagePath == null
+        ? const Icon(Icons.camera_alt, color: Colors.grey, size: 28)
+        : Stack(
+            children: [
+              // Display the uploaded image
+              ClipRRect(
                 borderRadius: BorderRadius.circular(12.0),
                 child: Image.file(
                   File(_imagePath!),
+                  width: double.infinity,
+                  height: double.infinity,
                   fit: BoxFit.cover,
                 ),
               ),
-      ),
-    ),
-  ],
-),
 
-
-
-          const SizedBox(height: 16.0),
-          TextField(
-            controller: _textLogController,
-            maxLines: 3,
-            decoration: InputDecoration(
-              hintText: 'Write your thoughts...',
-              hintStyle: TextStyle(color: Colors.white54),
-              filled: true,
-              fillColor: const Color(0xFF2A3557),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: BorderSide.none,
-              ),
-            ),
-            style: TextStyle(color: Colors.white),
-          ),
-          const SizedBox(height: 16.0),
-          Center(
-            child: ElevatedButton(
-              onPressed: _logForToday,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFBBBFFE),
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+              // Add the camera icon on the top-right corner
+              Positioned(
+                top: 8.0,
+                right: 8.0,
+                child: GestureDetector(
+                  onTap: _pickImage, // Allow user to replace the image
+                  child: Container(
+                    padding: const EdgeInsets.all(4.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.8), // Background for visibility
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt,
+                      color: Colors.black,
+                      size: 20.0,
+                    ),
+                  ),
                 ),
               ),
-              child: const Text(
-                'Save Log',
-                style: TextStyle(color: Colors.black),
-              ),
-            ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
+  ),
+)
+
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+
+
 
  Widget _buildEmotionIcon(String label, String assetPath) {
   bool isSelected = _selectedEmotion == label;
@@ -182,8 +243,8 @@ class _LoggingSectionState extends State<LoggingSection> {
       });
     },
     child: Container(
-      width: 50, // Reduced container size for better spacing
-      height: 50,
+      width: 35, // Reduced container size for better spacing
+      height: 80,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: isSelected ? const Color(0xFFBBBFFE) : Colors.grey[800],
@@ -195,8 +256,8 @@ class _LoggingSectionState extends State<LoggingSection> {
       child: Center(
         child: Image.asset(
           assetPath,
-          width: 24, // Reduced icon size
-          height: 24,
+          width: 34, // Reduced icon size
+          height: 80,
           fit: BoxFit.contain,
         ),
       ),
