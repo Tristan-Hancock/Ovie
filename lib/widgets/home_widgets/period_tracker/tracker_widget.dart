@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ovie/services/objectbox.dart';
 import 'package:ovie/services/models.dart';
+import 'package:ovie/pages/period_tracker/period_prediction.dart';
 
 class TrackerWidget extends StatefulWidget {
   final ObjectBox objectBox;
@@ -38,12 +39,17 @@ class _TrackerWidgetState extends State<TrackerWidget> {
           DateTime.now().difference(lastPeriod.startDate).inDays;
 
       // Predict next period date
-      int cycleLength = 28; // Default cycle length
-      nextPeriodDate = DateFormat('d MMMM').format(
-          lastPeriod.startDate.add(Duration(days: cycleLength)));
+      final periodPrediction =
+          PeriodPrediction(savedPeriods: savedPeriods); // Use prediction class
+      final predictedPeriods = periodPrediction.predictNextPeriods();
+      nextPeriodDate = predictedPeriods.isNotEmpty
+          ? DateFormat('d MMMM').format(predictedPeriods.first)
+          : "No data available";
 
       // Determine current phase
-      currentPhase = _determineCyclePhase(daysSinceLastPeriod, cycleLength, 5);
+      int cycleLength = periodPrediction.getCycleLength();
+      currentPhase =
+          _determineCyclePhase(daysSinceLastPeriod, cycleLength, 5); // Period duration = 5 days
     } else {
       // No saved periods
       nextPeriodDate = "No data available";
@@ -78,6 +84,7 @@ class _TrackerWidgetState extends State<TrackerWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+        
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -142,8 +149,8 @@ class _TrackerWidgetState extends State<TrackerWidget> {
                 flex: 1,
                 child: Center(
                   child: SizedBox(
-                    height: 100,
-                    width: 100,
+                    height: 120,
+                    width: 120,
                     child: CustomPaint(
                       painter: CyclePhasePainter(
                         daysSinceLastPeriod,
