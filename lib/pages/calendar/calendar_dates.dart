@@ -6,9 +6,12 @@ import 'package:scrollable_clean_calendar/controllers/clean_calendar_controller.
 import 'package:scrollable_clean_calendar/scrollable_clean_calendar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:scrollable_clean_calendar/utils/enums.dart';
-import 'package:scrollable_clean_calendar/models/day_values_model.dart';
 import 'period_prediction.dart'; // Import the PeriodPrediction class
 import 'dailyreport.dart';
+import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuthUser; // Alias Firebase's User class
+import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuthUser; // Alias Firebase's User class
+import 'package:ovie/services/models.dart'; // ObjectBox User class
+import 'package:ovie/services/models.dart' as ObjectBoxModels; // Alias ObjectBox User class
 
 class CalendarDates extends StatefulWidget {
   final ObjectBox objectBox;
@@ -63,8 +66,8 @@ class _CalendarDatesState extends State<CalendarDates> {
   }
 
   // Load saved periods and daily logs
-  Future<void> _loadSavedPeriodsAndLogs() async {
-    final firebaseUser = FirebaseAuth.instance.currentUser;
+ Future<void> _loadSavedPeriodsAndLogs() async {
+    final firebaseUser = FirebaseAuthUser.FirebaseAuth.instance.currentUser;
     if (firebaseUser == null) {
       print('No user logged in');
       return;
@@ -73,25 +76,29 @@ class _CalendarDatesState extends State<CalendarDates> {
     final userId = firebaseUser.uid;
     print('Fetching saved periods and logs for user ID: $userId');
 
-    // Query the saved periods for the current user
-    final user = widget.objectBox.userBox.query(User_.userId.equals(userId)).build().findFirst();
-    if (user != null) {
-      savedPeriods = widget.objectBox.periodTrackingBox
-          .query(PeriodTracking_.user.equals(user.id))
-          .build()
-          .find();
-
-      // Predict the next periods using PeriodPrediction
-      predictedPeriods = PeriodPrediction(savedPeriods: savedPeriods).predictNextPeriods();
-
-      // Fetch daily logs
-      dailyLogs = await dailyReport?.fetchLogsForCurrentUser() ?? [];
-
-      setState(() {});
-    } else {
-      print('User not found');
+    // Ensure the user exists in the local ObjectBox database
+    var user = widget.objectBox.userBox.query(User_.userId.equals(userId)).build().findFirst();
+    if (user == null) {
+      user = ObjectBoxModels.User(userId: userId); // ObjectBox User
+      widget.objectBox.userBox.put(user);
+      print('User added to local database: $userId');
     }
+
+    savedPeriods = widget.objectBox.periodTrackingBox
+        .query(PeriodTracking_.user.equals(user.id))
+        .build()
+        .find();
+
+    predictedPeriods = PeriodPrediction(savedPeriods: savedPeriods).predictNextPeriods();
+
+    dailyLogs = await dailyReport?.fetchLogsForCurrentUser() ?? [];
+
+    setState(() {});
   }
+
+
+
+
 
   // Function to check if a date has a log entry
   bool _isDateLogged(DateTime date) {
@@ -130,10 +137,9 @@ class _CalendarDatesState extends State<CalendarDates> {
     }
     return false;
   }
-
-  Future<void> _savePeriodTracking() async {
+Future<void> _savePeriodTracking() async {
     print('Attempting to save period tracking');
-    final firebaseUser = FirebaseAuth.instance.currentUser;
+    final firebaseUser = FirebaseAuthUser.FirebaseAuth.instance.currentUser;
     if (firebaseUser == null) {
       print('No user logged in');
       return;
@@ -143,14 +149,12 @@ class _CalendarDatesState extends State<CalendarDates> {
     print('User ID: $userId');
 
     try {
-      final user = widget.objectBox.userBox.query(User_.userId.equals(userId)).build().findFirst();
-
+      var user = widget.objectBox.userBox.query(User_.userId.equals(userId)).build().findFirst();
       if (user == null) {
-        print('User not found in local database');
-        return;
+        user = ObjectBoxModels.User(userId: userId); // ObjectBox User
+        widget.objectBox.userBox.put(user);
+        print('User added to local database: $userId');
       }
-
-      print('User found: ${user.userId}');
 
       final periodTracking = PeriodTracking(
         startDate: startDate!,
@@ -158,20 +162,19 @@ class _CalendarDatesState extends State<CalendarDates> {
       );
       periodTracking.user.target = user;
 
-      print('PeriodTracking object created');
-
       final id = widget.objectBox.periodTrackingBox.put(periodTracking);
       print('Saved PeriodTracking with ID: $id for date range: $startDate - ${endDate ?? startDate}');
 
-      // Hide the button after saving
       setState(() {
         showButton = false;
-        _loadSavedPeriodsAndLogs(); // Reload saved periods to update the calendar
+        _loadSavedPeriodsAndLogs();
       });
     } catch (e) {
       print('Error saving period tracking: $e');
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {

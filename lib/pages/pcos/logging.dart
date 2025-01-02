@@ -1,299 +1,269 @@
 import 'dart:io';
-
-import 'package:firebase_auth/firebase_auth.dart'; // Import only once
+import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuthUser;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:ovie/objectbox.g.dart';
-import 'package:ovie/services/models.dart';
-import 'package:ovie/services/objectbox.dart';
-import 'package:ovie/services/models.dart' as UserModel;
 import 'package:image_picker/image_picker.dart';
-class LoggingSection extends StatefulWidget {
-  final ObjectBox objectBox; // ObjectBox instance
+import 'package:ovie/objectbox.g.dart';
+import 'package:ovie/services/models.dart' as UserModel;
+import 'package:ovie/services/objectbox.dart';
+import 'package:ovie/services/models.dart';
 
-  LoggingSection({required this.objectBox}); // Accept ObjectBox instance
+class LoggingSection extends StatefulWidget {
+  final ObjectBox objectBox;
+
+  LoggingSection({required this.objectBox});
 
   @override
   _LoggingSectionState createState() => _LoggingSectionState();
 }
 
 class _LoggingSectionState extends State<LoggingSection> {
-  // Today's Log checkboxes
-  bool _isMenstruationChecked = false;
-  bool _isCrampsChecked = false;
-  bool _isAcneChecked = false;
-  bool _isHeadachesChecked = false;
-  String _selectedEmotion = 'Smiling'; // Default emotion
-  String? _imagePath; // For selfie image path
+  String _selectedEmotion = 'Smiling';
+  String? _imagePath;
   final ImagePicker _picker = ImagePicker();
- // Inside the build method
+  final TextEditingController _textLogController = TextEditingController();
 
-
-// Inside the build method
-@override
-Widget build(BuildContext context) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      // Today's Log section
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Today\'s log',
-            style: TextStyle(
-              fontSize: 16, // Smaller font size
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          IconButton(
-            icon: Icon(Icons.filter_alt_outlined, color: Colors.white),
-            onPressed: () {
-              // Add filter functionality here if needed
-            },
-          ),
-        ],
-      ),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _buildCheckbox('Menstruation', _isMenstruationChecked, (val) {
-            setState(() {
-              _isMenstruationChecked = val!;
-            });
-          }),
-          _buildCheckbox('Cramps', _isCrampsChecked, (val) {
-            setState(() {
-              _isCrampsChecked = val!;
-            });
-          }),
-        ],
-      ),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _buildCheckbox('Acne', _isAcneChecked, (val) {
-            setState(() {
-              _isAcneChecked = val!;
-            });
-          }),
-          _buildCheckbox('Headaches', _isHeadachesChecked, (val) {
-            setState(() {
-              _isHeadachesChecked = val!;
-            });
-          }),
-        ],
-      ),
-      SizedBox(height: 20),
-
-      // I feel section
-      Text(
-        'I feel',
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      ),
-      SizedBox(height: 4), // Reduce the height to move the icons closer to the label
-    Row(
-  crossAxisAlignment: CrossAxisAlignment.start, // Align the icons closer to the top
-  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  children: [
-    Row(
-      crossAxisAlignment: CrossAxisAlignment.start, // Adjusts vertical positioning of the icons
-      children: [
-        _buildEmotionIcon('Smiling', 'assets/icons/smiling.png'),
-        SizedBox(width: 8), // Adjust space between the icons
-        _buildEmotionIcon('Neutral', 'assets/icons/neutral.png'),
-        SizedBox(width: 8), // Adjust space between the icons
-        _buildEmotionIcon('Frowning', 'assets/icons/frowning.png'),
-        SizedBox(width: 8), // Adjust space between the icons
-        _buildEmotionIcon('Pouting', 'assets/icons/pouting.png'),
-      ],
-      
-    ),  
-    // Add the longer selfie capture section beside the icons
-    Column(
-      crossAxisAlignment: CrossAxisAlignment.end, // Align the button and selfie section to the right
-      children: [
-        _buildCaptureSelfie(),
-        SizedBox(height: 10), // Space between selfie section and button
-        // Add the "Log for Today" button below the selfie capture
-        ElevatedButton(
-          onPressed: _logForToday, // Handle log submission
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xFFBBBFFE), // Match the app bar color
-          ),
-          child: Text('Log for Today'),
-        ),
-      ],
-    ),
-  ],
-),
-
-      
-      // SizedBox(height: 10), // Space between icons and the button
-
-      // Move the button higher, just below the emotion icons
-      // Align(
-      //   alignment: Alignment.centerLeft, // Align to the left side
-      //   child: ElevatedButton(
-      //     onPressed: _logForToday, // Handle log submission
-      //     style: ElevatedButton.styleFrom(
-      //       backgroundColor: Color(0xFFBBBFFE), // Match the app bar color
-      //     ),
-      //     child: Text('Log for Today'),
-      //   ),
-      // ),
-    ],
-  );
-}
-
-
-
-
-  // Function to build each checkbox for Today's Log
-  Widget _buildCheckbox(String title, bool value, Function(bool?) onChanged) {
-    return Expanded(
-      child: CheckboxListTile(
-        title: Text(
-          title,
-          style: TextStyle(color: Colors.white, fontSize: 14), // Smaller text
-        ),
-        value: value,
-        onChanged: onChanged,
-        activeColor: Colors.pinkAccent,
-        checkColor: Colors.white,
-        controlAffinity: ListTileControlAffinity.leading, // Align checkbox to the left of text
-        contentPadding: EdgeInsets.zero, // Remove default padding
-      ),
-    );
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.camera);
+    if (pickedFile != null) {
+      setState(() {
+        _imagePath = pickedFile.path;
+      });
+    }
   }
 
-  // Function to build emotion icons with their label
-// Function to build emotion icons with their label
-Widget _buildEmotionIcon(String label, String assetPath) {
-  bool isSelected = _selectedEmotion == label; // Check if this emotion is selected
-
-  return Column(
-    children: [
-      GestureDetector(
-        onTap: () {
-          setState(() {
-            _selectedEmotion = label; // Set the selected emotion
-          });
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle, // Make the border circular
-            border: isSelected
-                ? Border.all(color: Color(0xFFBBBFFE), width: 3) // Circular outline for the selected emotion
-                : null, // No border if not selected
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(1.0), // Add some padding inside the border
-            child: Image.asset(assetPath, width: 40, height: 40), // Adjust icon size
-          ),
-        ),
-      ),
-      SizedBox(height: 8),
-    ],
-  );
-}
-
-
-Future<void> _pickImage() async {
-  final pickedFile = await _picker.pickImage(source: ImageSource.gallery); // Use gallery for now
-  if (pickedFile != null) {
-    setState(() {
-      _imagePath = pickedFile.path;
-    });
-  }
-}
-
-Widget _buildCaptureSelfie() {
-  return GestureDetector(
-    onTap: _pickImage, // Call function to pick an image
-    child: Container(
-      width: 150, // Adjust width to make it slightly wider
-      height: 220, // Increased height to align with the top of the "I feel" text
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey, width: 1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _imagePath == null
-              ? Icon(Icons.camera_alt_outlined, size: 40, color: Colors.grey)
-              : Image.file(
-                  File(_imagePath!), // Show the selected image
-                  width: 100,
-                  height: 100,
-                  fit: BoxFit.cover,
-                ),
-          SizedBox(height: 10),
-          Text(
-            'Capture your day.\nUpload a selfie!',
-            textAlign: TextAlign.center, // Align the text in the center
-            style: TextStyle(fontSize: 14, color: Colors.white),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-
-  // Function to log today's data to ObjectBox
-// Function to log today's data to ObjectBox
-void _logForToday() {
+  void _logForToday() {
   String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-  // Create a new daily log
   DailyLog log = DailyLog(
     date: currentDate,
-    isMenstruation: _isMenstruationChecked,
-    isCramps: _isCrampsChecked,
-    isAcne: _isAcneChecked,
-    isHeadaches: _isHeadachesChecked,
     emotion: _selectedEmotion,
-    imagePath: _imagePath, // Handle the image path here
+    imagePath: _imagePath,
+    textlog: _textLogController.text,
+    isMenstruation: false, // Default or user-provided value
+    isCramps: false,       // Default or user-provided value
+    isAcne: false,         // Default or user-provided value
+    isHeadaches: false,    // Default or user-provided value
   );
 
-  // Find or create a user entry for the current user in ObjectBox
   var user = widget.objectBox.userBox
-      .query(User_.userId.equals(FirebaseAuth.instance.currentUser!.uid))
-      .build()
-      .findFirst() ?? UserModel.User(userId: FirebaseAuth.instance.currentUser!.uid);
+          .query(User_.userId.equals(
+              FirebaseAuthUser.FirebaseAuth.instance.currentUser!.uid))
+          .build()
+          .findFirst() ??
+      UserModel.User(
+          userId: FirebaseAuthUser.FirebaseAuth.instance.currentUser!.uid);
 
   if (user.id == 0) {
-    widget.objectBox.userBox.put(user); // Save user if not exists
+    widget.objectBox.userBox.put(user);
   }
 
-  // Link the log to the current user
   log.user.target = user;
-
-  // Save the log to ObjectBox
   widget.objectBox.dailyLogBox.put(log);
 
-  // Show success message with a SnackBar
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     content: Text('Log for $currentDate saved successfully!'),
   ));
 
-  // Print log data for debugging
-  print('--- Daily Log ---');
-  print('Date: $currentDate');
-  print('Menstruation: $_isMenstruationChecked');
-  print('Cramps: $_isCrampsChecked');
-  print('Acne: $_isAcneChecked');
-  print('Headaches: $_isHeadachesChecked');
-  print('Emotion: $_selectedEmotion');
-  print('Image Path: $_imagePath');
 }
+
+
+ @override
+Widget build(BuildContext context) {
+  return Container(
+    padding: const EdgeInsets.all(16.0),
+    decoration: BoxDecoration(
+      color: const Color(0xFF1E2749),
+      borderRadius: BorderRadius.circular(16.0),
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Left Column: Emotions and Text Input
+        Expanded(
+          flex: 3,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // "Log your emotions" Text
+              Text(
+                'Log your emotions',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white70,
+                ),
+              ),
+              const SizedBox(height: 8.0),
+
+              // Emotion Icons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  _buildEmotionIcon('Smiling', 'assets/icons/smiling.png'),
+                  const SizedBox(width: 12),
+                  _buildEmotionIcon('Neutral', 'assets/icons/neutral.png'),
+                  const SizedBox(width: 12),
+                  _buildEmotionIcon('Frowning', 'assets/icons/frowning.png'),
+                  const SizedBox(width: 12),
+                  _buildEmotionIcon('Pouting', 'assets/icons/pouting.png'),
+                ],
+              ),
+              const SizedBox(height: 16.0),
+
+              // "Write your thoughts" Text Box
+              TextField(
+                controller: _textLogController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: 'Write your thoughts...',
+                  hintStyle: TextStyle(color: Colors.white54),
+                  filled: true,
+                  fillColor: const Color(0xFF2A3557),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                style: TextStyle(color: Colors.white),
+              ),
+
+              const SizedBox(height: 16.0),
+
+              // Save Log Button
+              Center(
+                child: ElevatedButton(
+                  onPressed: _logForToday,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFBBBFFE),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  child: const Text(
+                    'Save Log',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(width: 16.0), // Spacing between columns
+
+        // Right Column: Image Capture
+        Expanded(
+          flex: 2,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // "Capture your day" Text
+              Text(
+                'Capture your day.\nUpload a selfie!',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white70,
+                ),
+              ),
+              const SizedBox(height: 16.0),
+
+              // Image Picker
+              GestureDetector(
+  onTap: _pickImage,
+  child: Container(
+    width: 200.0,
+    height: 250.0,
+    decoration: BoxDecoration(
+      color: const Color(0xFF2A3557),
+      borderRadius: BorderRadius.circular(12.0),
+      border: Border.all(color: Colors.grey),
+    ),
+    child: _imagePath == null
+        ? const Icon(Icons.camera_alt, color: Colors.grey, size: 28)
+        : Stack(
+            children: [
+              // Display the uploaded image
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12.0),
+                child: Image.file(
+                  File(_imagePath!),
+                  width: double.infinity,
+                  height: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+
+              // Add the camera icon on the top-right corner
+              Positioned(
+                top: 8.0,
+                right: 8.0,
+                child: GestureDetector(
+                  onTap: _pickImage, // Allow user to replace the image
+                  child: Container(
+                    padding: const EdgeInsets.all(4.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.8), // Background for visibility
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt,
+                      color: Colors.black,
+                      size: 20.0,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+  ),
+)
+
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+
+
+
+ Widget _buildEmotionIcon(String label, String assetPath) {
+  bool isSelected = _selectedEmotion == label;
+  return GestureDetector(
+    onTap: () {
+      setState(() {
+        _selectedEmotion = label;
+      });
+    },
+    child: Container(
+      width: 35, // Reduced container size for better spacing
+      height: 80,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isSelected ? const Color(0xFFBBBFFE) : Colors.grey[800],
+        border: Border.all(
+          color: isSelected ? Colors.white : Colors.transparent,
+          width: 2.0,
+        ), // Add border for selected state
+      ),
+      child: Center(
+        child: Image.asset(
+          assetPath,
+          width: 34, // Reduced icon size
+          height: 80,
+          fit: BoxFit.contain,
+        ),
+      ),
+    ),
+  );
+}
+
 
 }

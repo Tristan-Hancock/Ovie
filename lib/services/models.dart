@@ -19,6 +19,7 @@ class DailyLog {
   String emotion; // Smiling, Neutral, Frowning, Pouting
   String? imagePath; // Local path of the saved image
   final user = ToOne<User>(); // Link to User
+  String? textlog;
 
   DailyLog({
     this.id = 0,
@@ -28,6 +29,7 @@ class DailyLog {
     required this.isAcne,
     required this.isHeadaches,
     required this.emotion,
+    this.textlog,
     this.imagePath,
   });
 }
@@ -53,11 +55,17 @@ class Prescription {
   String title;
   String extractedText;
   DateTime scanDate;
+  String? frequency; // Frequency of medication (e.g., "2 times a day")
+  DateTime? startDate; // Start date of the medication schedule
+  List<String>? times; // List of times for taking medication (e.g., ["8:00 AM", "8:00 PM"])
 
   Prescription({
     this.id = 0,
     required this.title,
     required this.extractedText,
     required this.scanDate,
+    this.frequency, // Optional frequency
+    this.startDate, // Optional start date
+    this.times, // Optional list of times
   });
 }

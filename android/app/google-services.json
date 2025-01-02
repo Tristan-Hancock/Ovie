@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "366437988737",
     "project_id": "ovie-andriod",
-    "storage_bucket": "ovie-andriod.appspot.com"
+    "storage_bucket": "ovie-andriod.firebasestorage.app"
   },
   "client": [
     {
@@ -12,7 +12,12 @@
           "package_name": "com.example.ovie"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "366437988737-oj9i4eunapmnllvj05is8krre7lhpkpm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBV_idmzqr_mUIOX_bvsn3TNJVMYytVRYw"
@@ -20,7 +25,41 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "366437988737-oj9i4eunapmnllvj05is8krre7lhpkpm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:366437988737:android:86547470a7d11d6bb9d080",
+        "android_client_info": {
+          "package_name": "com.ovelia.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "366437988737-oj9i4eunapmnllvj05is8krre7lhpkpm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBV_idmzqr_mUIOX_bvsn3TNJVMYytVRYw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "366437988737-oj9i4eunapmnllvj05is8krre7lhpkpm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

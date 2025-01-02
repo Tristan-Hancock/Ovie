@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ovie/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:ovie/pages/important_intro/intro_check.dart';
 
 class AuthPage extends StatefulWidget {
   @override
@@ -13,6 +12,7 @@ class _AuthPageState extends State<AuthPage> {
   final AuthService _authService = AuthService();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController(); // Added for username
   bool _isSignIn = true;
 
   @override
@@ -38,6 +38,14 @@ class _AuthPageState extends State<AuthPage> {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 50),
+
+                // Username field for Sign-Up
+                if (!_isSignIn)
+                  _buildTextField(
+                    controller: _usernameController,
+                    labelText: 'Username',
+                  ),
+                if (!_isSignIn) SizedBox(height: 10),
 
                 // Email and Password fields
                 _buildTextField(
@@ -133,26 +141,34 @@ class _AuthPageState extends State<AuthPage> {
       _passwordController.text.trim(),
     );
     if (user != null) {
-      bool showIntro = await IntroCheck.isFirstTime();
-      Navigator.pushReplacementNamed(context, showIntro ? '/intro' : '/home');
+      Navigator.pushReplacementNamed(context, '/home');
     }
   }
 
   // Sign up method
   Future<void> _signUp() async {
+    String username = _usernameController.text.trim();
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+
+    if (username.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Username cannot be empty.")),
+      );
+      return;
+    }
+
     User? user = await _authService.signUpWithEmail(
-      _emailController.text.trim(),
-      _passwordController.text.trim(),
-      _emailController.text.trim(),
+      email,
+      password,
+      username, // Pass username to the AuthService
     );
 
     if (user != null) {
-      // Show a confirmation message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Sign up successful! Please log in.")),
       );
 
-      // Redirect to login screen
       setState(() {
         _isSignIn = true; // Toggle to the login view
       });

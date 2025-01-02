@@ -22,7 +22,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(1, 8103322577343170361),
       name: 'DailyLog',
-      lastPropertyId: const obx_int.IdUid(9, 2615910110464159976),
+      lastPropertyId: const obx_int.IdUid(10, 3332677545117055059),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -71,7 +71,12 @@ final _entities = <obx_int.ModelEntity>[
             type: 11,
             flags: 520,
             indexId: const obx_int.IdUid(1, 2376494571298422472),
-            relationTarget: 'User')
+            relationTarget: 'User'),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(10, 3332677545117055059),
+            name: 'textlog',
+            type: 9,
+            flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[]),
@@ -128,7 +133,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(4, 4436851435844874837),
       name: 'Prescription',
-      lastPropertyId: const obx_int.IdUid(4, 161248815512566361),
+      lastPropertyId: const obx_int.IdUid(7, 5618768621099066928),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -150,6 +155,21 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(4, 161248815512566361),
             name: 'scanDate',
             type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(5, 7909258149398639928),
+            name: 'frequency',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(6, 4631217309151812967),
+            name: 'startDate',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(7, 5618768621099066928),
+            name: 'times',
+            type: 30,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
@@ -218,7 +238,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final imagePathOffset = object.imagePath == null
               ? null
               : fbb.writeString(object.imagePath!);
-          fbb.startTable(10);
+          final textlogOffset =
+              object.textlog == null ? null : fbb.writeString(object.textlog!);
+          fbb.startTable(11);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, dateOffset);
           fbb.addBool(2, object.isMenstruation);
@@ -228,6 +250,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addOffset(6, emotionOffset);
           fbb.addOffset(7, imagePathOffset);
           fbb.addInt64(8, object.user.targetId);
+          fbb.addOffset(9, textlogOffset);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -248,6 +271,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
               const fb.BoolReader().vTableGet(buffer, rootOffset, 14, false);
           final emotionParam = const fb.StringReader(asciiOptimization: true)
               .vTableGet(buffer, rootOffset, 16, '');
+          final textlogParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGetNullable(buffer, rootOffset, 22);
           final imagePathParam = const fb.StringReader(asciiOptimization: true)
               .vTableGetNullable(buffer, rootOffset, 18);
           final object = DailyLog(
@@ -258,6 +283,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
               isAcne: isAcneParam,
               isHeadaches: isHeadachesParam,
               emotion: emotionParam,
+              textlog: textlogParam,
               imagePath: imagePathParam);
           object.user.targetId =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0);
@@ -335,17 +361,29 @@ obx_int.ModelDefinition getObjectBoxModel() {
         objectToFB: (Prescription object, fb.Builder fbb) {
           final titleOffset = fbb.writeString(object.title);
           final extractedTextOffset = fbb.writeString(object.extractedText);
-          fbb.startTable(5);
+          final frequencyOffset = object.frequency == null
+              ? null
+              : fbb.writeString(object.frequency!);
+          final timesOffset = object.times == null
+              ? null
+              : fbb.writeList(
+                  object.times!.map(fbb.writeString).toList(growable: false));
+          fbb.startTable(8);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, titleOffset);
           fbb.addOffset(2, extractedTextOffset);
           fbb.addInt64(3, object.scanDate.millisecondsSinceEpoch);
+          fbb.addOffset(4, frequencyOffset);
+          fbb.addInt64(5, object.startDate?.millisecondsSinceEpoch);
+          fbb.addOffset(6, timesOffset);
           fbb.finish(fbb.endTable());
           return object.id;
         },
         objectFromFB: (obx.Store store, ByteData fbData) {
           final buffer = fb.BufferContext(fbData);
           final rootOffset = buffer.derefObject(0);
+          final startDateValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 14);
           final idParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
           final titleParam = const fb.StringReader(asciiOptimization: true)
@@ -355,11 +393,23 @@ obx_int.ModelDefinition getObjectBoxModel() {
                   .vTableGet(buffer, rootOffset, 8, '');
           final scanDateParam = DateTime.fromMillisecondsSinceEpoch(
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0));
+          final frequencyParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGetNullable(buffer, rootOffset, 12);
+          final startDateParam = startDateValue == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(startDateValue);
+          final timesParam = const fb.ListReader<String>(
+                  fb.StringReader(asciiOptimization: true),
+                  lazy: false)
+              .vTableGetNullable(buffer, rootOffset, 16);
           final object = Prescription(
               id: idParam,
               title: titleParam,
               extractedText: extractedTextParam,
-              scanDate: scanDateParam);
+              scanDate: scanDateParam,
+              frequency: frequencyParam,
+              startDate: startDateParam,
+              times: timesParam);
 
           return object;
         })
@@ -405,6 +455,10 @@ class DailyLog_ {
   /// See [DailyLog.user].
   static final user =
       obx.QueryRelationToOne<DailyLog, User>(_entities[0].properties[8]);
+
+  /// See [DailyLog.textlog].
+  static final textlog =
+      obx.QueryStringProperty<DailyLog>(_entities[0].properties[9]);
 }
 
 /// [User] entity fields to define ObjectBox queries.
@@ -453,4 +507,16 @@ class Prescription_ {
   /// See [Prescription.scanDate].
   static final scanDate =
       obx.QueryDateProperty<Prescription>(_entities[3].properties[3]);
+
+  /// See [Prescription.frequency].
+  static final frequency =
+      obx.QueryStringProperty<Prescription>(_entities[3].properties[4]);
+
+  /// See [Prescription.startDate].
+  static final startDate =
+      obx.QueryDateProperty<Prescription>(_entities[3].properties[5]);
+
+  /// See [Prescription.times].
+  static final times =
+      obx.QueryStringVectorProperty<Prescription>(_entities[3].properties[6]);
 }

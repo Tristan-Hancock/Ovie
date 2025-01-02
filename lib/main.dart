@@ -10,8 +10,6 @@ import 'widgets/bottom_navigation.dart';
 import 'pages/pcos/home_page.dart';
 import 'pages/calendar/calendar_page.dart';
 import 'pages/communityscreen/communityfeed.dart';
-import 'pages/important_intro/intro_check.dart';
-import 'pages/important_intro/intro_screen.dart';
 import 'pages/useraccount/Authpage.dart';
 import 'pages/useraccount/profile.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -29,8 +27,6 @@ void main() async {
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  final showIntro = await IntroCheck.isFirstTime();
-
   // Initialize ObjectBox and log for debugging
   final objectBox = await ObjectBox.create();
   log('ObjectBox initialized successfully');
@@ -39,19 +35,16 @@ void main() async {
   log('Current User: ${currentUser != null ? "Logged In" : "Not Logged In"}');
 
   runApp(MyApp(
-    showIntro: showIntro,
     isLoggedIn: currentUser != null,
     objectBox: objectBox,
   ));
 }
 
 class MyApp extends StatelessWidget {
-  final bool showIntro;
   final bool isLoggedIn;
   final ObjectBox objectBox;
 
   MyApp({
-    required this.showIntro,
     required this.isLoggedIn,
     required this.objectBox,
   });
@@ -61,20 +54,18 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Ovelia',
       theme: ThemeData(
-        scaffoldBackgroundColor: Color(0xFF101631), // Main background color
-      textTheme: GoogleFonts.quicksandTextTheme(
-  Theme.of(context).textTheme.copyWith(
-    displayLarge: TextStyle(fontSize: 50, fontWeight: FontWeight.w600, color: Colors.white), // Replaces headline1
-    bodyLarge: TextStyle(fontSize: 16, color: Colors.white), // Replaces bodyText1
-    bodyMedium: TextStyle(fontSize: 14, color: Colors.white70), // Replaces bodyText2
-  ),
-),
-
+        scaffoldBackgroundColor: Color(0xFF101631),
+        textTheme: GoogleFonts.quicksandTextTheme(
+          Theme.of(context).textTheme.copyWith(
+            displayLarge: TextStyle(fontSize: 50, fontWeight: FontWeight.w600, color: Colors.white),
+            bodyLarge: TextStyle(fontSize: 16, color: Colors.white),
+            bodyMedium: TextStyle(fontSize: 14, color: Colors.white70),
+          ),
+        ),
       ),
       initialRoute: _initialRoute(),
       routes: {
         '/': (context) => AuthPage(),
-        '/intro': (context) => IntroScreen(),
         '/home': (context) => MainScreen(objectBox: objectBox),
         '/calendar': (context) => CalendarPage(objectBox: objectBox),
         '/community': (context) => CommunityPage(),
@@ -85,9 +76,9 @@ class MyApp extends StatelessWidget {
 
   String _initialRoute() {
     if (isLoggedIn) {
-      return showIntro ? '/intro' : '/home';
+      return '/home'; // Always go to the home screen if logged in
     } else {
-      return '/';
+      return '/'; // Show the AuthPage if not logged in
     }
   }
 }

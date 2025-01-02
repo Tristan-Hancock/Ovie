@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:8103322577343170361",
-      "lastPropertyId": "9:2615910110464159976",
+      "lastPropertyId": "10:3332677545117055059",
       "name": "DailyLog",
       "properties": [
         {
@@ -56,6 +56,11 @@
           "flags": 520,
           "indexId": "1:2376494571298422472",
           "relationTarget": "User"
+        },
+        {
+          "id": "10:3332677545117055059",
+          "name": "textlog",
+          "type": 9
         }
       ],
       "relations": []
@@ -113,7 +118,7 @@
     },
     {
       "id": "4:4436851435844874837",
-      "lastPropertyId": "4:161248815512566361",
+      "lastPropertyId": "7:5618768621099066928",
       "name": "Prescription",
       "properties": [
         {
@@ -136,6 +141,21 @@
           "id": "4:161248815512566361",
           "name": "scanDate",
           "type": 10
+        },
+        {
+          "id": "5:7909258149398639928",
+          "name": "frequency",
+          "type": 9
+        },
+        {
+          "id": "6:4631217309151812967",
+          "name": "startDate",
+          "type": 10
+        },
+        {
+          "id": "7:5618768621099066928",
+          "name": "times",
+          "type": 30
         }
       ],
       "relations": []

@@ -1,111 +1,150 @@
 import 'package:flutter/material.dart';
-import 'package:ovie/services/models.dart';
 import '../../services/objectbox.dart';
+import '../../services/models.dart';
 
-class PrescriptionTextDisplay extends StatelessWidget {
-  final String text;
+class PrescriptionTextDisplayDialog extends StatefulWidget {
   final ObjectBox objectBox;
+  final String extractedText;
   final VoidCallback onSaved;
 
-  const PrescriptionTextDisplay({Key? key, required this.text, required this.objectBox, required this.onSaved}) : super(key: key);
+  const PrescriptionTextDisplayDialog({
+    Key? key,
+    required this.objectBox,
+    required this.extractedText,
+    required this.onSaved,
+  }) : super(key: key);
 
-  void _savePrescription(BuildContext context, String title) {
-    final prescription = Prescription(
-      title: title,
-      extractedText: text,
-      scanDate: DateTime.now(),
-    );
+  @override
+  _PrescriptionTextDisplayDialogState createState() =>
+      _PrescriptionTextDisplayDialogState();
+}
 
-    objectBox.savePrescription(prescription);
-    onSaved(); // Trigger the callback to refresh the list
+class _PrescriptionTextDisplayDialogState
+    extends State<PrescriptionTextDisplayDialog> {
+  late TextEditingController _titleController;
+  late TextEditingController _frequencyController;
+  late TextEditingController _textController;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Prescription saved successfully!")),
-    );
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController();
+    _frequencyController = TextEditingController();
+    _textController = TextEditingController(text: widget.extractedText);
   }
 
-  void _promptForTitle(BuildContext context) {
-    final titleController = TextEditingController();
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _frequencyController.dispose();
+    _textController.dispose();
+    super.dispose();
+  }
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text("Enter Prescription Title"),
-        content: TextField(
-          controller: titleController,
-          decoration: InputDecoration(
-            hintText: "Prescription Title",
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text("Cancel"),
-          ),
-          TextButton(
-            onPressed: () {
-              final title = titleController.text.trim();
-              if (title.isNotEmpty) {
-                Navigator.of(context).pop();
-                _savePrescription(context, title);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Title cannot be empty!")),
-                );
-              }
-            },
-            child: Text("Save"),
-          ),
-        ],
-      ),
+  void _savePrescription() {
+    final title = _titleController.text.trim();
+    final frequency = _frequencyController.text.trim();
+    final extractedText = _textController.text.trim();
+
+    if (title.isEmpty || frequency.isEmpty || extractedText.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("All fields are required!")),
+      );
+      return;
+    }
+
+    final prescription = Prescription(
+      title: title,
+      extractedText: extractedText,
+      scanDate: DateTime.now(),
+      frequency: frequency,
     );
+
+    widget.objectBox.prescriptionBox.put(prescription);
+    widget.onSaved();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Prescription saved successfully!")),
+    );
+
+    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      backgroundColor: const Color(0xFF1A1E39),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        constraints: BoxConstraints(
+          maxHeight: screenHeight * 0.75, // Limit the height of the dialog
         ),
-        title: Text(
-          'Extracted Prescription',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Color(0xFF101631),
-      ),
-      backgroundColor: Color(0xFF101631),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SingleChildScrollView(
-              child: Text(
-                text,
-                style: TextStyle(fontSize: 18, color: Colors.white),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _titleController,
+                decoration: InputDecoration(
+                  labelText: "Prescription Title",
+                  labelStyle: const TextStyle(color: Colors.white70),
+                  filled: true,
+                  fillColor: const Color(0xFF101631),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                style: const TextStyle(color: Colors.white),
               ),
-            ),
-          ),
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton(
-                onPressed: () => _promptForTitle(context), // Open title prompt
+              const SizedBox(height: 16),
+              TextField(
+                controller: _frequencyController,
+                decoration: InputDecoration(
+                  labelText: "Frequency (e.g., 2 times a day)",
+                  labelStyle: const TextStyle(color: Colors.white70),
+                  filled: true,
+                  fillColor: const Color(0xFF101631),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                style: const TextStyle(color: Colors.white),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _textController,
+                maxLines: null,
+                decoration: InputDecoration(
+                  labelText: "Prescription Text",
+                  labelStyle: const TextStyle(color: Colors.white70),
+                  filled: true,
+                  fillColor: const Color(0xFF101631),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                style: const TextStyle(color: Colors.white),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _savePrescription,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFBBBFFE),
+                  backgroundColor: const Color(0xFFBBBFFE),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text('Save'),
+                child: const Text(
+                  "Save",
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
